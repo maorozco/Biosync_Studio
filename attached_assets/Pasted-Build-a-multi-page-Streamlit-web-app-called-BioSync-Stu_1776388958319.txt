@@ -1,0 +1,469 @@
+Build a multi-page Streamlit web app called "BioSync Studio" in Spanish — an
+biofabrication optimization. It helps small and medium labs optimize their b
+predictions, digital twins, and a global bio-knowledge network.
+
+The app simulates a real SaaS platform for monitoring bioreactors, predictin
+knowledge between labs worldwide.
+
+## DESIGN SYSTEM
+- Color scheme: deep blue-teal (#0D4F4F) primary, dark background sections (
+white text on dark, dark text on light
+- Modern, futuristic, "mission control" aesthetic — like NASA but for biolog
+- Font: system-ui
+- st.set_page_config(page_title="BioSync Studio", page_icon="🔬", layout="wi
+- Custom CSS: glassmorphism cards (semi-transparent backgrounds with blur), 
+transitions
+- .streamlit/config.toml:
+  [theme]
+  primaryColor="#00E5CC"
+  backgroundColor="#FFFFFF"
+  secondaryBackgroundColor="#E8F5F3"
+  textColor="#0A2E2E"
+  font="sans serif"
+- ALL text in Spanish
+- Sidebar: dark background (#0A2E2E), "🔬 BioSync Studio" logo, navigation, 
+
+## SIDEBAR NAVIGATION:
+- 🏠 Inicio
+- 📊 Dashboard de Biorreactor
+- 🌐 Red de Bio-Conocimiento
+- 🧪 Simulador de Bioprocesos
+- 💬 Asistente BioSync
+
+---
+
+## PAGE 1: "🏠 Inicio" (HOME - default landing page)
+
+### HERO SECTION
+Full-width with dark overlay (rgba(10,46,46,0.75)) over background image: h
+1582719471384-894fbb16e074?w=1920 (laboratory/science image)
+
+Centered content:
+- "BioSync Studio" — white, bold, 3.5rem, font-family: system-ui
+- "El cerebro digital de la biofabricación" — cyan #00E5CC, 1.5rem
+- "Plataforma de inteligencia artificial que optimiza bioprocesos en tiempo 
+predicción ML, y una red global de conocimiento para que ningún laboratorio 
+max-width 700px
+- Two buttons:
+  Button 1 (cyan #00E5CC): "📊 Ver Dashboard Demo"
+  Button 2 (white outline): "🌐 Explorar Red de Conocimiento"
+
+### SECTION: "El problema que resolvemos"
+Dark background (#0A2E2E), white text. Two columns:
+
+LEFT column — "Así funciona un laboratorio HOY" (with ❌ icons):
+- "❌ Toman UNA muestra al día — si el cultivo muere a las 3am, se enteran a
+- "❌ Optimizan por prueba y error — cambian una variable a la vez durante 1
+- "❌ Cada corrida fallida cuesta $500-$5,000 en reactivos"
+- "❌ Cada laboratorio empieza de cero — no comparten protocolos"
+- "❌ Solo Pfizer y Novartis pueden pagar IA para bioprocesos ($500K+)"
+
+RIGHT column — "Así funciona con BioSync Studio" (with ✅ icons):
+- "✅ Monitoreo cada 30 segundos — alertas predictivas antes de que algo fal
+- "✅ ML optimiza condiciones en semanas, no meses — 3-30x menos experimento
+- "✅ Simulación antes de ejecutar — reduce costo por corrida en 10x"
+- "✅ Red global de protocolos — si alguien ya lo optimizó, tú lo sabes"
+- "✅ Desde $99/mes — la inteligencia de Pfizer al alcance de cualquier lab"
+
+### SECTION: "¿Qué puedes producir con BioSync Studio?" (card grid, 3 column
+Cards with dark teal background and cyan borders:
+- 💊 "Vitaminas y nutrientes" — "B12, B2 (riboflavina), ácido fólico, vitami
+accesible."
+- 🧬 "Proteínas recombinantes" — "Insulina, factores de crecimiento, colágen
+biomedicina."
+- 🎨 "Pigmentos naturales" — "Colorantes alimentarios sin químicos. Mercado 
+- 🧪 "Enzimas industriales" — "Para detergentes, textil, alimentos. Mercado 
+- 🌿 "Bioplásticos" — "PHA, PLA producidos por fermentación. Reemplazan petr
+- 🍺 "Aromas y fragancias" — "Biosintéticos por fermentación de precisión. M
+
+### SECTION: "Números que hablan" (dark teal bar)
+4 metrics in white/cyan:
+- "10x" / "Reducción de costo por corrida experimental"
+- "3-30x" / "Menos experimentos necesarios (bioRxiv 2024)"
+- "2,880x" / "Más datos (de 1/día a cada 30 seg)"
+- "$99" / "Precio starter vs $500K de Siemens"
+
+### SECTION: "Cómo funciona" (3 steps with arrows)
+Step 1: "📡 Conecta" — "Conecta los sensores de tu biorreactor (pH, DO, temp
+Compatible con sensores estándar (Hamilton, Mettler Toledo)."
+Step 2: "🧠 Aprende" — "Nuestra IA (Gradient Boosting + PINN) analiza tus da
+patrones, y predice el rendimiento óptimo."
+Step 3: "🚀 Optimiza" — "Recibe recomendaciones de setpoints, alertas predic
+optimizados de la red global."
+
+### SECTION: "Respaldados por ciencia"
+Gray text: "Nature | Science | Biotechnology & Bioengineering | Trends in Bi
+(Pfizer MI Edge) | Proyecto BALANCE (Canadá-UK)"
+
+### FOOTER
+Dark: "BioSync Studio © 2026 | Red Bull Basement | Democratizando la biofabr
+
+---
+
+## PAGE 2: "📊 Dashboard de Biorreactor" (THE STAR)
+
+Title: "📊 Monitor de Biorreactor en Tiempo Real"
+Subtitle: "Datos simulados de un cultivo de E. coli para producción de Vitam
+
+### TOP METRICS BAR (4 columns, big numbers)
+Use st.metric with deltas:
+- "pH actual" value="7.12" delta="-0.08 vs óptimo (7.2)" delta_color="invers
+- "Oxígeno disuelto" value="42.3%" delta="+2.1% vs última hora" delta_color=
+- "Temperatura" value="37.2°C" delta="+0.2°C" delta_color="off"
+- "Rendimiento predicho" value="94.2%" delta="+3.1% con ajustes" delta_color
+
+### MAIN CHARTS SECTION (2 columns)
+
+LEFT column (60%): 
+5 Plotly line charts stacked vertically, each showing 72 hours of simulated 
+using numpy:
+
+Chart 1 — "pH" (range 6.5-7.5): starts at 7.2, gradually drifts down to 6.9 
+band showing "Rango óptimo: 7.0-7.3". Use color green.
+
+Chart 2 — "Oxígeno Disuelto (%)" (range 20-60): starts at 50%, drops as cell
+hour 36, then recovers slightly. Use color blue.
+
+Chart 3 — "Temperatura (°C)" (range 35-39): stays around 37°C with small osc
+orange.
+
+Chart 4 — "Glucosa (g/L)" (range 0-25): starts at 20 g/L, decreasing S-curve
+g/L by hour 60. Add a red horizontal line at 2 g/L labeled "⚠️ Nivel crítico
+
+Chart 5 — "Densidad celular (OD600)" (range 0-15): classic bacterial growth 
+exponential (6-30h), stationary (30-60h), slight decline (60-72h). Use color
+
+ALL charts: white background, height=200, clean axes, time on X axis ("Horas
+with mode='lines', smooth curves with realistic noise (np.random.normal * 0.
+
+Generate data with this code pattern:
+```python
+import numpy as np
+hours = np.linspace(0, 72, 200)
+ph = 7.2 - 0.004*hours + np.random.normal(0, 0.03, 200)
+do = 50 - 20*np.exp(-0.001*(hours-36)**2/100) + np.random.normal(0, 1, 200)
+temp = 37 + 0.3*np.sin(hours/6) + np.random.normal(0, 0.1, 200)
+glucose = 20 / (1 + np.exp(0.08*(hours-35))) + np.random.normal(0, 0.3, 200)
+od600 = 12 / (1 + np.exp(-0.15*(hours-20))) + np.random.normal(0, 0.2, 200)
+```
+
+RIGHT column (40%):
+
+### "🧠 Recomendaciones de la IA" panel
+Dark teal card (#0A2E2E) with white text. Show these recommendations:
+
+"⚠️ ALERTA: Glucosa se agotará en ~4 horas al ritmo actual de consumo. Recom
+5 g/L de glucosa concentrada."
+
+"📈 OPTIMIZACIÓN: El pH ha bajado a 7.12 (óptimo: 7.2). Agregar 0.5 mL de Na
+estimado: +3.1% en rendimiento."
+
+"✅ ESTADO: Cultivo en fase estacionaria (hora 42/72). Densidad celular OD60
+estimado: 94.2% del objetivo."
+
+"🔮 PREDICCIÓN: Si se mantienen las condiciones actuales, el cultivo alcanza
+las próximas 12 horas."
+
+"📊 COMPARACIÓN: Este cultivo está en el percentil 87 de rendimiento compara
+la Red de Bio-Conocimiento."
+
+### "🤖 Modelo de IA" expander
+When expanded show:
+- "Algoritmo: Gradient Boosting Regressor + Physics-Informed Neural Network 
+- "Datos de entrenamiento: 45 cultivos publicados + datos de la Red de Bio-C
+- "R² Score: 0.89"
+- "Variables monitoreadas: pH, DO, temperatura, glucosa, OD600, CO₂, agitaci
+- "Frecuencia de predicción: cada 30 segundos"
+- "Fuentes: Pfizer MI Edge (AWS), Algocell, bioRxiv 2024, Biotechnology & Bi
+
+### BOTTOM SECTION: "⚙️ Ajuste de Setpoints"
+Show a form with sliders that "control" the bioreactor (simulated):
+- pH setpoint: slider 6.0-8.0, default 7.2
+- Temperature setpoint: slider 25-42°C, default 37°C
+- DO setpoint: slider 20-80%, default 40%
+- Agitation (RPM): slider 100-800, default 400
+- Button: "🔄 Aplicar setpoints" → shows success message "Setpoints actualiz
+recalculada: {new_value}%"
+
+---
+
+## PAGE 3: "🌐 Red de Bio-Conocimiento"
+
+Title: "🌐 Red Global de Bio-Conocimiento"
+Subtitle: "Protocolos optimizados compartidos por laboratorios de todo el mu
+
+### TOP: Stats bar
+"🔬 234 protocolos compartidos | 👥 89 laboratorios conectados | 🌍 18 paíse
+rendimiento"
+
+### SEARCH BAR
+Text input: "Buscar protocolo (ej: 'vitamina B12', 'riboflavina', 'E. coli',
+
+### FILTER BUTTONS
+"Todos", "Vitaminas", "Proteínas", "Enzimas", "Pigmentos", "Bioplásticos"
+
+### PROTOCOL CARDS (2 columns, 8 cards)
+
+Card 1:
+- Badge: "🏆 Top rendimiento"
+- "Producción de Vitamina B12 con E. coli K-12"
+- Lab: "Lab de Biotecnología — Universidad Nacional de Colombia"
+- Conditions: "37°C | pH 7.2 | DO 40% | Medio LB + cobalto 10µM"
+- Result: "Rendimiento: 145 mg/L (percentil 95)"
+- "⭐ 4.8/5 (23 replicaciones exitosas)"
+
+Card 2:
+- Badge: "📈 Más replicado"
+- "Producción de Riboflavina (B2) con B. subtilis"
+- Lab: "Instituto de Fermentación — Universidad de São Paulo"
+- Conditions: "35°C | pH 6.8 | DO 50% | Medio mínimo + ribosa"
+- Result: "Rendimiento: 4.2 g/L (62% mejora vs baseline)"
+- "⭐ 4.6/5 (45 replicaciones)"
+
+Card 3:
+- "Producción de Ácido Láctico con Lactobacillus plantarum"
+- Lab: "Centro de Bioprocesos — UNAM México"
+- Conditions: "37°C | pH 6.0 | Anaerobio | Medio MRS + glucosa 50g/L"
+- Result: "Rendimiento: 89 g/L (conversión 89%)"
+- "⭐ 4.5/5 (31 replicaciones)"
+
+Card 4:
+- "Producción de GFP recombinante en E. coli BL21"
+- Lab: "Laboratorio de Proteínas — Universidad de los Andes"
+- Conditions: "30°C | pH 7.0 | DO 30% | IPTG 0.5mM a OD600=0.6"
+- Result: "Rendimiento: 320 mg/L proteína soluble"
+- "⭐ 4.7/5 (18 replicaciones)"
+
+Card 5:
+- "Producción de Astaxantina (pigmento) con Haematococcus pluvialis"
+- Lab: "Lab de Microalgas — Technion, Israel"
+- Conditions: "22°C | pH 7.5 | Luz intensa fase 2 | Nitrato limitante"
+- Result: "Rendimiento: 38 mg/g biomasa seca"
+- "⭐ 4.3/5 (12 replicaciones)"
+
+Card 6:
+- "Producción de PHB (bioplástico) con Cupriavidus necator"
+- Lab: "Centro de Biopolímeros — ETH Zurich"
+- Conditions: "30°C | pH 7.0 | DO 20% | Limitación de nitrógeno"
+- Result: "Rendimiento: 78% PHB/biomasa seca"
+- "⭐ 4.4/5 (15 replicaciones)"
+
+Card 7:
+- "Producción de Insulina recombinante en E. coli"
+- Lab: "Lab de Biofarma — Universidad de Buenos Aires"
+- Conditions: "28°C | pH 7.2 | DO 35% | IPTG 0.3mM a OD600=0.8"
+- Result: "Rendimiento: 5.2 g/L en cuerpos de inclusión"
+- "⭐ 4.2/5 (8 replicaciones)"
+
+Card 8:
+- Badge: "🆕 Nuevo"
+- "Producción de Vanilina biosintética con S. cerevisiae"
+- Lab: "Lab de Biología Sintética — DTU Dinamarca"
+- Conditions: "30°C | pH 5.5 | Glucosa fed-batch | Gene pathway: 4 genes"
+- Result: "Rendimiento: 500 mg/L vanilina (vs 0 sin ingeniería)"
+- "⭐ 4.1/5 (6 replicaciones)"
+
+### BOTTOM: "¿Cómo funciona la Red?"
+Expander with:
+"La Red de Bio-Conocimiento funciona con aprendizaje federado: cada laborato
+(condiciones, rendimientos) sin compartir sus datos propietarios ni protocol
+Studio aprende de todos y mejora las recomendaciones para cada uno. Es como 
+posición, y todos se benefician de la inteligencia colectiva."
+
+---
+
+## PAGE 4: "🧪 Simulador de Bioprocesos"
+
+Title: "🧪 Simulador de Bioprocesos — Gemelo Digital"
+Subtitle: "Simula tu cultivo antes de ejecutarlo. Ahorra reactivos, tiempo y
+
+### INPUT SECTION (card, left 40%):
+"Configura tu bioproceso"
+
+- **Organismo** — selectbox: ["E. coli K-12", "E. coli BL21 (DE3)", "Bacillu
+cerevisiae", "Lactobacillus plantarum", "Pichia pastoris", "Corynebacterium 
+necator"]
+
+- **Producto objetivo** — selectbox (changes per organism):
+  If E. coli K-12: ["Vitamina B12", "Proteína recombinante (GFP)", "Aminoáci
+recombinante"]
+  If E. coli BL21: ["Proteína recombinante genérica", "Enzima industrial", "
+  If B. subtilis: ["Riboflavina (B2)", "Surfactina (biosurfactante)", "Amila
+  If S. cerevisiae: ["Etanol", "Vanilina biosintética", "Artemisininina", "I
+  If L. plantarum: ["Ácido láctico", "Probióticos (biomasa)", "Bacteriocinas
+  If P. pastoris: ["Proteína recombinante (alta expresión)", "Enzima industr
+  If C. glutamicum: ["L-lisina", "L-glutamato", "L-treonina", "Ácido succíni
+  If C. necator: ["PHB (bioplástico)", "PHA copolímeros"]
+
+- **Volumen del biorreactor** — selectbox: ["250 mL (matraz)", "1 L (banco)"
+"50 L (piloto)", "100 L (producción)", "500 L (producción)"]
+
+- **Medio de cultivo** — selectbox: ["LB (Luria-Bertani)", "Medio mínimo M9"
+(levaduras)", "MRS (lactobacilos)", "Medio industrial (melaza)"]
+
+- **Temperatura (°C)** — slider 20-42, default 37
+- **pH objetivo** — slider 5.0-8.5, step 0.1, default 7.0
+- **DO objetivo (%)** — slider 10-80, default 40
+- **Duración del cultivo (horas)** — slider 12-168, default 72
+
+Big cyan button: "🧪 Simular Bioproceso"
+
+### SIMULATION LOADING
+Sequential phases:
+- (2s) "🔬 Cargando parámetros cinéticos de {organism}..."
+- (2s) "📊 Construyendo modelo metabólico del bioproceso..."
+- (1.5s) "🧠 Ejecutando simulación con Gradient Boosting + cinética Monod...
+- (1.5s) "📈 Generando curvas de crecimiento y producción..."
+- (1s) "✅ Simulación completada"
+
+### RESULTS (right 60%):
+
+**Section 1: "📈 Curvas de Simulación"**
+Plotly chart with 3 lines on the same plot (dual Y axis):
+- Green line: Biomasa (OD600) — sigmoid growth curve
+- Blue line: Sustrato/Glucosa (g/L) — decreasing consumption curve
+- Red line: Producto (g/L or mg/L) — increasing production curve (lags behin
+
+Generate curves using Monod kinetics:
+```python
+# Simplified Monod growth simulation
+t = np.linspace(0, duration, 300)
+mu_max = 0.5  # adjust per organism
+Ks = 0.5
+S0 = 20  # initial substrate
+X0 = 0.1  # initial biomass
+Yxs = 0.5  # yield coefficient
+Yps = 0.3  # product yield
+
+X = X0 * np.exp(mu_max * t / (1 + np.exp(-0.1*(t-20))))  # simplified
+X = np.clip(X, 0, 12)
+S = S0 - X/Yxs
+S = np.clip(S, 0, S0)
+P = Yps * (X - X0) + noise
+```
+
+Adjust curve shapes per organism (E. coli grows faster than S. cerevisiae, e
+
+**Section 2: "📊 Resultados Predichos"**
+4 metrics:
+- "Rendimiento de {product}": "{value} {unit}" (e.g., "145 mg/L" for B12, "4
+- "Productividad": "{value} {unit}/h"
+- "Conversión de sustrato": "{percent}%"
+- "Tiempo hasta máximo rendimiento": "{hours} horas"
+
+**Section 3: "🎯 Optimización sugerida por IA"**
+Green card with suggestions:
+- "pH: Tu setpoint es {pH}. Óptimo para {product} con {organism}: {optimal_p
+rendimiento en {X}%."
+- "Temperatura: {temp}°C está {within/outside} del rango óptimo ({opt_range}
+- "DO: {do}% {is appropriate / should be adjusted to} {opt_do}% para maximiz
+- "Alimentación: Considerar fed-batch con pulso de glucosa a hora {critical_
+productiva."
+
+**Section 4: "💰 Estimación de Costos"**
+Table:
+- "Medio de cultivo ({volume})": "${cost1}"
+- "Energía (agitación + temperatura)": "${cost2}"
+- "Reactivos adicionales": "${cost3}"
+- "**Total estimado por corrida**": "**${total}**"
+- "**Con optimización BioSync (ahorro 10x)**": "**${total/10}**"
+- "Valor del producto obtenido": "${product_value}"
+
+**Section 5: "📋 Protocolo Sugerido"**
+Expander with step-by-step protocol:
+1. Preparación de medio: {medium}, {volume}, autoclavar 121°C 15min
+2. Inoculación: pre-cultivo overnight, inocular a OD600 = 0.05-0.1
+3. Condiciones: {temp}°C, {pH}, {do}% DO, {rpm} RPM
+4. Monitoreo: pH cada hora, glucosa cada 2h, OD600 cada 2h
+5. Inducción (si aplica): Agregar inductor a OD600 = {value}
+6. Cosecha: Centrifugar a {value}xg, {time} min
+
+### BOTTOM: Comparison
+"⚡ Sin BioSync: necesitarías ~{50-100} corridas experimentales para encontr
+${cost_high}). Con BioSync: simulaste en {seconds} segundos por ${zero}."
+
+---
+
+## PAGE 5: "💬 Asistente BioSync"
+
+Title: "💬 Asistente BioSync — Tu experto en bioprocesos 24/7"
+
+Chat interface with st.chat_message and st.chat_input.
+
+6 suggested question buttons:
+- "¿Cuál es el pH óptimo para B12 con E. coli?"
+- "Mi rendimiento bajó, ¿qué puede estar pasando?"
+- "¿Cómo escalo de 1L a 50L?"
+- "¿Cuánto cuesta producir riboflavina?"
+- "¿Qué sensores necesito?"
+- "¿Cómo funciona BioSync Studio?"
+
+Keyword-based responses:
+
+If "pH" or "óptimo":
+"🧪 Los rangos de pH óptimos por organismo son:\n- E. coli: 6.8-7.4 (óptimo 
+(óptimo 7.0)\n- S. cerevisiae: 4.5-6.0 (óptimo 5.5)\n- L. plantarum: 5.5-6.5
+6.0 (óptimo 5.5)\n\nPara producción de Vitamina B12 con E. coli K-12: pH 7.2
+📖 Fuente: Biotechnology & Bioengineering, 2025"
+
+If "rendimiento" or "bajó" or "problema":
+"🔍 Las causas más comunes de caída de rendimiento son:\n1. pH fuera de rang
+electrodo)\n2. Agotamiento de sustrato (medir glucosa residual)\n3. Acumulac
+(acetato en E. coli si glucosa >10g/L)\n4. Contaminación (verificar pureza d
+insuficiente (aumentar agitación o flujo de aire)\n\n¿En qué organismo y pro
+recomendaciones más específicas."
+
+If "escal" or "scale" or "1L" or "50L":
+"📏 Los factores críticos de scale-up son:\n1. kLa (transferencia de oxígeno
+constante\n2. Tiempo de mezcla: aumenta con el volumen — verificar homogenei
+superficie/volumen: cambia la disipación de calor\n4. Gradientes: en >50L pu
+DO\n\nRegla práctica: mantener P/V (potencia por volumen) constante y verifi
+out.\n📖 Fuente: Proyecto BALANCE (Canadá-UK, $2M, 2025)"
+
+If "costo" or "precio" or "cuánto":
+"💰 Costos estimados de producción por corrida:\n- Matraz 250mL: $5-15 USD (
+1L: $50-150 USD\n- Biorreactor 5L: $200-500 USD\n- Biorreactor 50L: $1,000-3
+$3,000-8,000 USD\n\nBioSync Studio reduce estos costos ~10x al simular antes
+condiciones con IA.\n\nBiorreactor usado funcional (5L): desde $5,000 USD en
+3000)"
+
+If "sensor" or "hardware" or "equipo":
+"📡 Sensores básicos para monitoreo de biorreactor:\n- pH: Hamilton EasyFerm
+disuelto: Hamilton VisiFerm DO (~$400-700)\n- Temperatura: PT100 estándar (~
+Futura (capacitancia, ~$2,000+)\n- Glucosa inline: Raman spectroscopy (~$80,
+mínimo (pH + DO + temp): ~$800-1,300 USD\nBioSync Studio es compatible con c
+digital o analógica."
+
+If "BioSync" or "funciona" or "qué es":
+"🔬 BioSync Studio es una plataforma de IA para optimización de bioprocesos.
+Dashboard: Monitoreo en tiempo real de tu biorreactor con alertas predictiva
+Protocolos optimizados compartidos por labs del mundo (aprendizaje federado)
+que predice el resultado de tu cultivo ANTES de ejecutarlo\n4. 🤖 IA Predict
+óptimos y detecta problemas antes de que ocurran\n\nPrecio: desde $99/mes (S
+(Enterprise)\nCompetencia más cercana: Siemens ($500K+), Algocell ($50K+/año
+barato que la opción más cercana."
+
+If "hola" or "ayuda":
+"¡Hola! 👋 Soy el asistente de BioSync Studio. Puedo ayudarte con:\n🧪 Optim
+bioprocesos\n📊 Interpretación de datos de biorreactor\n📏 Problemas de scal
+Selección de equipos y sensores\n🌐 Búsqueda de protocolos en la Red de Bio-
+trabajando?"
+
+Default:
+"Gracias por tu pregunta. Te recomiendo explorar:\n- 📊 Dashboard para ver e
+Simulador para probar tu bioproceso virtualmente\n- 🌐 Red de Bio-Conocimien
+optimizados\n\n¿Quieres que te ayude con algo específico sobre tu cultivo o 
+
+---
+
+## TECHNICAL REQUIREMENTS
+- streamlit >= 1.30
+- plotly for ALL charts
+- pandas, numpy for data generation
+- Use st.session_state for storing simulation results
+- Use time.sleep for loading simulations
+- Generate ALL bioreactor data with numpy (realistic curves with noise)
+- No external APIs needed
+- Responsive design
+- All text in Spanish
+```
