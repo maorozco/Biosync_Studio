@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-bg: #06191a;
+  --color-brand-surface: #0a2223;
+  --color-brand-surface-2: #0f2d2f;
+  --color-brand-border: #1a3a3c;
+  --color-brand-accent: #00e5cc;
+  --color-brand-accent-dim: #00b3a0;
+  --color-brand-text: #e6f0f0;
+  --color-brand-muted: #7a9595;
+  --color-brand-warn: #ffc857;
+  --color-brand-danger: #ff6b6b;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", monospace;
+}
+
+html,
+body,
+#root {
+  min-height: 100vh;
+  background: var(--color-brand-bg);
+  color: var(--color-brand-text);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-brand-accent);
+  color: var(--color-brand-bg);
+}
+
+/* Accent underline helper for inline links inside prose. */
+.accent-underline {
+  text-decoration: underline;
+  text-decoration-color: var(--color-brand-accent);
+  text-underline-offset: 4px;
+  text-decoration-thickness: 2px;
+}
+
+/* Dot pattern for Hero/BuildInPublic backgrounds */
+.dot-grid {
+  background-image: radial-gradient(
+    rgba(0, 229, 204, 0.08) 1px,
+    transparent 1px
+  );
+  background-size: 22px 22px;
+}
