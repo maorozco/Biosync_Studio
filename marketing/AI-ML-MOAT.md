@@ -131,9 +131,9 @@ Ver `.research-synthesis.md` §6. No duplicar aquí — fuente única de verdad.
 
 ### Mensaje 3 — Compliance-ready (Ángulo A)
 
-**ES:** "Annex 22 mid-2026 prohíbe IA adaptativa en GMP. Aizon pre-anunció Agentic AI que choca frontal. BioSync nace frozen-mode — Annex 22-ready desde el día uno." (→ hook A1 + E4)
+**ES:** "EMA Annex 22 (draft jul 2025, regla final Q2 2026) restringe IA adaptativa en decisiones GMP-críticas. Aizon pre-anunció Agentic AI que choca frontal con el draft. BioSync nace con weights fijos + audit trail ALCOA+ — listos cuando la regla se publique." (→ hook A1 + E4)
 
-**EN:** "Annex 22 mid-2026 bans adaptive AI in GMP. Aizon pre-announced Agentic AI that crashes head-on. BioSync is born frozen-mode — Annex 22-ready from day one." (→ hook A1 + E4)
+**EN:** "EMA Annex 22 (Jul 2025 draft, final rule Q2 2026) restricts adaptive AI in GMP-critical decisions. Aizon pre-announced Agentic AI that crashes head-on with the draft. BioSync ships with fixed weights + ALCOA+ audit trail — ready when the rule lands." (→ hook A1 + E4)
 
 ---
 

@@ -15,9 +15,9 @@
 
 ### Larga (≤200 caracteres)
 
-**ES:** BioSync Studio: ML híbrido que detecta deriva de batch en <60 min y captura tu tribal knowledge antes de que Juan se vaya. $99/mes por reactor, self-serve, Annex 22-ready.
+**ES:** BioSync Studio: ML híbrido que detecta deriva de batch temprano (sensores en tiempo real) y captura tu tribal knowledge antes de que Juan se vaya. $99/mes por reactor, self-serve, preparado para EMA Annex 22 (draft jul 2025).
 
-**EN:** BioSync Studio: hybrid ML that flags batch drift in <60 min and captures your tribal knowledge before Juan quits. $99/mo per reactor, self-serve, Annex 22-ready from day one.
+**EN:** BioSync Studio: hybrid ML that flags batch drift early (real-time sensors) and captures your tribal knowledge before Juan quits. $99/mo per reactor, self-serve, prepared for EMA Annex 22 (Jul 2025 draft).
 
 ---
 
@@ -27,7 +27,7 @@
 
 | # | ES | EN |
 |---|---|---|
-| A1 | "Tu vendor actual promete 'IA que aprende en producción'. EMA Annex 22 (mid-2026) **lo prohíbe**. BioSync nace congelable." | "Your current vendor promises 'AI that learns in production.' EMA Annex 22 (mid-2026) **bans it**. BioSync is born frozen-exportable." |
+| A1 | "Tu vendor promete 'IA que aprende en producción'. EMA Annex 22 (draft jul 2025, regla final Q2 2026) lo **restringe** en GMP-crítico. BioSync nace con weights fijos + audit trail." | "Your vendor promises 'AI that learns in production.' EMA Annex 22 (Jul 2025 draft, final rule Q2 2026) **restricts** it in GMP-critical decisions. BioSync ships with fixed weights + audit trail." |
 | A2 | "Inspecciones FDA a plantas LATAM subieron 40% en 2025. ¿Tu audit trail ALCOA+ está en Excel o en BioSync?" | "FDA inspections of foreign plants rose 40% in 2025. Is your ALCOA+ audit trail in Excel or in BioSync?" |
 | A3 | "FDA + EMA publicaron 10 principios GxP-AI el 23 de enero 2026. Tu stack cumple el principio 9 (life-cycle mgmt)?" | "FDA + EMA published 10 GxP-AI principles on Jan 23, 2026. Does your stack meet principle 9 (life-cycle mgmt)?" |
 | A4 | "ANMAT exige QR codes en empaque secundario desde 19-may-2026. Upstream la presión sube. BioSync genera el batch record firmado." | "ANMAT requires QR codes on secondary packaging from May 19, 2026. Upstream pressure is rising. BioSync generates signed batch records." |
@@ -37,7 +37,7 @@
 | # | ES | EN |
 |---|---|---|
 | B1 | "OFAT es la tortura de los lunes. 6 meses cambiando 1 variable por mes. DoE híbrido en BioSync: 3 semanas a 3 variables críticas." | "OFAT is Monday torture. 6 months changing 1 variable/month. Hybrid DoE in BioSync: 3 weeks to 3 critical factors." |
-| B2 | "Si muestreas 1×/día, tu batch puede morir a las 3am y enterarte a las 9. BioSync alerta en <60 minutos." | "If you sample 1×/day, your batch can die at 3am and you'll know at 9. BioSync alerts in <60 minutes." |
+| B2 | "Si muestreas 1×/día, tu batch puede morir a las 3am y enterarte a las 9. BioSync alerta en <60 minutos con sensores reportando en tiempo real." | "If you sample 1×/day, your batch can die at 3am and you'll know at 9. BioSync alerts in <60 minutes with real-time sensor feeds." |
 | B3 | "Onboarding Sartorius: 6 meses. BioSync: sube tu CSV el lunes, recomendaciones el viernes." | "Sartorius onboarding: 6 months. BioSync: upload your CSV Monday, get recommendations Friday." |
 | B4 | "Scale-up Series A en 9 meses. No hay tiempo para contratar un consultor de $150K. BioSync simula lab→pilot→50L este fin de semana." | "Series A scale-up in 9 months. No time to hire a $150K consultant. BioSync simulates lab→pilot→50L this weekend." |
 
@@ -66,7 +66,7 @@
 | E1 | "PINN + Gradient Boosting: no es 'IA mágica'. Son ecuaciones Monod con red neuronal corrigiendo los residuos. Te mostramos el código." | "PINN + Gradient Boosting: not 'magic AI'. Monod equations with a neural net correcting residuals. Code is open for inspection." |
 | E2 | "Aprendizaje federado en biomanufacturing: MELLODDY hizo drug discovery. Nosotros lo hacemos para fermentación — categoría unowned." | "Federated learning for biomanufacturing: MELLODDY did drug discovery. We do it for fermentation — an unowned category." |
 | E3 | "RFdiffusion3 (open Dec 2025) + Boltz-2 (MIT license) + tu data histórica = diseño→fermentación→escala en un solo SaaS." | "RFdiffusion3 (open Dec 2025) + Boltz-2 (MIT) + your historical data = design→fermentation→scale in one SaaS." |
-| E4 | "Annex 22 prohíbe IA adaptativa en GMP. Nuestro modo 'frozen-export' te da versión fija, firmada, auditable. Annex 22-ready." | "Annex 22 bans adaptive AI in GMP. Our 'frozen-export' mode delivers fixed, signed, auditable versions. Annex 22-ready." |
+| E4 | "Annex 22 (draft jul 2025) restringe IA adaptativa en decisiones GMP-críticas. Nuestro modo weights-fijos te da versión firmada + audit trail ALCOA+. Regla final Q2 2026 — ya estamos listos." | "Annex 22 (Jul 2025 draft) restricts adaptive AI in GMP-critical decisions. Our fixed-weights mode delivers signed versions + ALCOA+ audit trail. Final rule Q2 2026 — we're already there." |
 
 ---
 
@@ -84,7 +84,7 @@
 >
 > Y esta historia la oigo en MX, en Boston, en Barcelona. Mismo pain, mismo Excel, mismo "cambiá 1 variable y ojalá escale".
 >
-> Por eso construí BioSync Studio. $99 USD/mes por reactor. Onboarding en 5 días. Alerta de deriva en <60 min. Annex 22-ready desde el día uno.
+> Por eso construí BioSync Studio. $99 USD/mes por reactor. Onboarding en 5 días. Alerta de deriva en <60 min cuando hay sensores en tiempo real. Preparado para EMA Annex 22 (regla final Q2 2026) con weights fijos y audit trail desde el día uno.
 >
 > Link a waitlist en comentarios. Feedback honesto > likes.
 >
@@ -100,7 +100,7 @@
 >
 > If you're running 2–8 bioreactors in a 9-FTE lab and sampling manually once a day, the math is worse.
 >
-> BioSync Studio flags drift in <60 minutes, captures tribal knowledge before your lead scientist quits, and costs $99/mo per reactor — public pricing, no "contact sales."
+> BioSync Studio flags drift in <60 minutes (with real-time sensors), captures tribal knowledge before your lead scientist quits, and costs $99/mo per reactor — public pricing, no "contact sales."
 >
 > 14-day free trial. Upload a CSV of 5 past runs, get hybrid-ML recommendations back in 48h.
 >
@@ -108,7 +108,7 @@
 >
 > Manuela
 >
-> P.S. We're Annex 22-ready from day one — frozen-model export, signed batch records, ALCOA+ lineage. Your future compliance officer will thank us.
+> P.S. Annex 22 draft (Jul 2025, final rule Q2 2026) restricts adaptive AI in GMP. We ship with fixed-weights mode + signed batch records + ALCOA+ lineage from day one. Your future compliance officer will thank us.
 
 ### Formato 3 · Video script 30s (ES, Manuela to camera)
 

@@ -99,6 +99,27 @@ Según `docs/competitors/CLAUDE.md`:
 - **Federated biomanufacturing** (whitespace — competidores hacen federated drug discovery, no biofabricación)
 - **Edge AI kit** (<$2K BOM viable con Jetson Orin 2026)
 
+## Proyectos hermanos (capital semilla finalistas)
+
+Manuela Orozco tiene **dos proyectos** en la misma competencia de capital semilla nacional (finalistas · pitch 2026-04-22 · slot 4 min + demo):
+
+- **BioSync Studio** — este repo · biofabricación / precision fermentation / nutrientes + compuestos vitales.
+- **Impulso BioCycle** — biorremediación · scaffolding en `Proyectos_investigacion/REPLIT_FINAL/` (Streamlit + Python + modelo ML), bundle paste-ready en `marketing/biocycle-replit-bundle.md`.
+
+**Pitch finalista conecta ambos bajo una plataforma común:** *"misma IA al derecho (producir lo que importa) y al revés (degradar lo que sobra)"*. Los hooks emocionales (*4 niños/min por desnutrición · 450 años del plástico*) son **anclas, NO soluciones directas** — disclaim quirúrgico en `marketing/pitch-script-final.md`.
+
+## Pitch finalista 2026-04-22
+
+Material operacional en `marketing/pitch-*`:
+- `pitch-script-final.md` — script literal 4 min, 3 actos, 8 slides
+- `pitch-cheatsheet-fuentes.md` — 10 citas URL+DOI para Q&A
+- `pitch-qa-cheatsheet.md` — 10 Q&A bombs + respuestas seguras (5 técnicas del audit + 5 operacionales)
+- `biocycle-replit-bundle.md` — guía paste-ready para levantar BioCycle MVP en Replit
+
+**Stones-in-shoes audit aplicado** a `landing/src/messages.ts`, `ADS-HOOKS.md`, `AI-ML-MOAT.md`: hedging en claims de `<60 min deriva` (caveat "sensores en tiempo real"), `Annex 22-ready` (draft jul 2025, regla final Q2 2026, NO "prohíbe mid-2026"), `<50 batches` (reformulado a "≥20 etiquetados + Bayesian opt debajo"), `playas in-situ` (reformulado a "biorreactores distribuidos + in-situ hidrocarburos").
+
+Regla de voz Manu: humano · storytelling · genuino · transparente · conviction ("te prometo" · "tengo la seguridad"). Si una frase suena a VC deck, se reescribe. Ver `~/.claude/projects/.../memory/pitch_style_manu.md`.
+
 ## Marketing & Discovery (launch 2026-04-22)
 
 Fundadora: **Manuela Orozco** (Ingeniera Biológica + Analytics Engineer, 5 años).

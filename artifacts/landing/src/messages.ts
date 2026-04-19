@@ -101,7 +101,7 @@ export const es: Messages = {
   nav: { cta: "Lista de espera →" },
   hero: {
     h1: "No pierdas otro lote por muestrear una vez al día.",
-    sub: "BioSync Studio alerta de deriva de batch en menos de 60 minutos, reduce 6 meses de OFAT a 3 semanas de DoE híbrido, y cuesta $99/mes por reactor. Para labs de 2 a 15 personas que no van a pagar Sartorius.",
+    sub: "BioSync Studio detecta deriva de batch en <60 minutos (con sensores en tiempo real), y compacta 6 meses de OFAT a 3 semanas de DoE híbrido cuando tenés ≥20 corridas etiquetadas. $99/mes por reactor. Para labs de 2 a 15 personas que no van a pagar Sartorius.",
     emailPlaceholder: "tu@email.com",
     button: "Quiero probarlo",
     counterBefore: "Ya somos",
@@ -155,7 +155,7 @@ export const es: Messages = {
       {
         n: "03",
         title: "Actúa",
-        body: "Alertas SMS/Slack en menos de 60 min antes del crash. DoE híbrido que reduce 6 meses de OFAT a 3 semanas.",
+        body: "Alertas SMS/Slack en <60 min antes del crash (con sensores reportando <5 min cadencia). DoE híbrido que compacta 6 meses de OFAT a 3 semanas con ≥20 corridas etiquetadas.",
       },
     ],
   },
@@ -171,8 +171,8 @@ export const es: Messages = {
         body: "Tu lab comparte pesos, nunca data cruda. MELLODDY hizo drug discovery. Nosotros hacemos fermentación — categoría sin dueño.",
       },
       {
-        title: "Annex 22-ready desde día uno",
-        body: "Modelo frozen-export firmado + audit trail ALCOA+. Tu vendor actual que promete «IA adaptativa» va a tener problemas en 2027.",
+        title: "Annex 22-ready (seguimos la publicación)",
+        body: "EMA Annex 22 draft (jul 2025, regla final Q2 2026) restringe IA adaptativa en GMP. Diseñamos desde día uno con weights fijos + audit trail ALCOA+. Cuando la regla final salga, ya estamos listos.",
       },
       {
         title: "Plantillas verticales",
@@ -305,7 +305,7 @@ export const en: Messages = {
   nav: { cta: "Join waitlist →" },
   hero: {
     h1: "Don't lose another batch to once-a-day sampling.",
-    sub: "BioSync Studio flags batch drift in under 60 minutes, compresses 6 months of OFAT into 3 weeks of hybrid DoE, and costs $99/mo per reactor. For 2–15 FTE labs that won't pay Sartorius.",
+    sub: "BioSync Studio flags batch drift in <60 minutes (with real-time sensors), and compresses 6 months of OFAT into 3 weeks of hybrid DoE once you have ≥20 labeled runs. $99/mo per reactor. For 2–15 FTE labs that won't pay Sartorius.",
     emailPlaceholder: "you@work.com",
     button: "Let me in",
     counterBefore: "Already",
@@ -359,7 +359,7 @@ export const en: Messages = {
       {
         n: "03",
         title: "Act",
-        body: "SMS/Slack alerts <60 min before the crash. Hybrid DoE that compresses 6 months of OFAT into 3 weeks.",
+        body: "SMS/Slack alerts <60 min before the crash (with sensors reporting every <5 min). Hybrid DoE that compresses 6 months of OFAT into 3 weeks once you have ≥20 labeled runs.",
       },
     ],
   },
@@ -375,8 +375,8 @@ export const en: Messages = {
         body: "Your lab shares weights, never raw data. MELLODDY did drug discovery. We do fermentation — an unowned category.",
       },
       {
-        title: "Annex 22-ready from day one",
-        body: "Signed frozen-export model + ALCOA+ audit trail. Your current vendor promising 'adaptive AI' will have problems in 2027.",
+        title: "Annex 22-ready (we follow the publication)",
+        body: "EMA Annex 22 draft (Jul 2025, final rule Q2 2026) restricts adaptive AI in GMP decisions. We ship with fixed weights + ALCOA+ audit trail from day one. When the final rule lands, we're already compliant.",
       },
       {
         title: "Vertical templates",
