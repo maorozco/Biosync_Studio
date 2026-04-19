@@ -69,6 +69,7 @@ pnpm --filter @workspace/api-server dev
 PORT=3001 pnpm --filter @workspace/landing dev
 pnpm --filter @workspace/landing build
 pnpm --filter @workspace/landing typecheck
+pnpm --filter @workspace/landing test:e2e  # Playwright E2E (ES+EN full signup → green tier)
 
 # Typecheck todo
 pnpm typecheck

@@ -56,6 +56,23 @@ node -v            # debe ser ≥20
 
 ---
 
+## Step 3.5 · Playwright E2E (recomendado antes de deploy)
+
+```bash
+pnpm --filter @workspace/landing exec playwright install chromium  # solo primera vez
+pnpm --filter @workspace/landing test:e2e
+```
+
+4 tests cubren:
+1. `/` redirige a `/es` o `/en` según `navigator.language`.
+2. ES flow full: hero email → `/es/gracias` → 6 preguntas → score 20 → green tier → botón Calendly visible.
+3. EN toggle: de `/en` click ES → navega a `/es` con copy traducida.
+4. EN flow full: equivalente al #2 en inglés, tier green.
+
+Si algún test falla, mirá `test-results/` + `playwright-report/` (se abren con `pnpm --filter @workspace/landing test:e2e:report`).
+
+**Bug conocido histórico:** en React 19, acceder `e.currentTarget.value` dentro de un `setState` updater devuelve null (currentTarget se limpia async después del handler). Fix: extraer value síncrono antes de llamar setState. Ya aplicado en ThankYouForm.tsx — si agregás otro input, usá el mismo patrón.
+
 ## Step 4 · Smoke test local antes de deploy
 
 ```bash

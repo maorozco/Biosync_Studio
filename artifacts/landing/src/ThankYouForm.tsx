@@ -127,7 +127,10 @@ export function ThankYouForm({ lang, t, initialEmail, calendlyUrl }: Props) {
             <Select
               id="country"
               value={state.country}
-              onChange={(e) => setState((s) => ({ ...s, country: e.currentTarget.value }))}
+              onChange={(e) => {
+                const value = e.target.value;
+                setState((s) => ({ ...s, country: value }));
+              }}
             >
               <option value="" disabled>
                 —
@@ -146,9 +149,10 @@ export function ThankYouForm({ lang, t, initialEmail, calendlyUrl }: Props) {
             <Select
               id="sector"
               value={state.sector}
-              onChange={(e) =>
-                setState((s) => ({ ...s, sector: e.currentTarget.value as Sector }))
-              }
+              onChange={(e) => {
+                const value = e.target.value as Sector;
+                setState((s) => ({ ...s, sector: value }));
+              }}
             >
               <option value="" disabled>
                 —
@@ -174,7 +178,10 @@ export function ThankYouForm({ lang, t, initialEmail, calendlyUrl }: Props) {
             maxLength={200}
             placeholder={q.pain.placeholder}
             value={state.painText}
-            onChange={(e) => setState((s) => ({ ...s, painText: e.currentTarget.value }))}
+            onChange={(e) => {
+              const value = e.target.value;
+              setState((s) => ({ ...s, painText: value }));
+            }}
           />
           <p className="mt-2 text-xs text-brand-muted">{q.pain.hint}</p>
           <p className="mt-1 text-xs text-brand-muted">
@@ -348,7 +355,10 @@ function CheckCard({
         type="checkbox"
         value={value}
         checked={checked}
-        onChange={(e) => onChange(e.currentTarget.checked)}
+        onChange={(e) => {
+          const next = e.target.checked;
+          onChange(next);
+        }}
         className="accent-brand-accent"
       />
       <span className="text-sm text-brand-text">{label}</span>
