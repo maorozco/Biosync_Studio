@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { streamAskAssistant, type Citation, type Recommendation } from "../lib/api";
 import CitationGraph from "../components/CitationGraph";
+import { emitTaskComplete } from "../components/onboarding/OnboardingProvider";
 
 interface Message {
   role: "user" | "bot";
@@ -133,6 +134,7 @@ export default function Asistente() {
   const handleSend = async (text: string) => {
     if (!text.trim() || loading) return;
     const q = text.trim();
+    emitTaskComplete("ask-assistant");
     const userMsg: Message = { role: "user", text: q, time: getTime() };
     const botIndex = messages.length + 1; // index of the bot placeholder we'll append
     setMessages((prev) => [

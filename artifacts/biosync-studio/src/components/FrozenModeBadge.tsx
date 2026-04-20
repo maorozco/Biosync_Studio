@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { emitTaskComplete } from "./onboarding/OnboardingProvider";
 
 /**
  * Annex-22 Frozen-Mode Badge + Model Card PDF export.
@@ -135,6 +136,7 @@ export default function FrozenModeBadge() {
     }
     // Liberar la URL después de 10s para que el browser tenga tiempo de cargarla
     setTimeout(() => URL.revokeObjectURL(url), 10_000);
+    emitTaskComplete("export-model-card");
   };
 
   return (

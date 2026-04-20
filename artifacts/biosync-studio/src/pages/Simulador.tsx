@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { ComposedChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { emitTaskComplete } from "../components/onboarding/OnboardingProvider";
 
 const organismos = [
   "E. coli K-12",
@@ -124,6 +125,7 @@ export default function Simulador() {
     }
     setSimData(genSimData(duration, organismo));
     setLoading(false);
+    emitTaskComplete("run-simulation");
   }, [duration, organismo]);
 
   const rend = rendimientoBase[producto] || rendimientoBase.default;

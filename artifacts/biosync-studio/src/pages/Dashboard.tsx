@@ -6,6 +6,7 @@ import CycleReplay from "../components/CycleReplay";
 import FrozenModeBadge from "../components/FrozenModeBadge";
 import { usePasteCSV } from "../hooks/usePasteCSV";
 import { motion, AnimatePresence } from "framer-motion";
+import { emitTaskComplete } from "../components/onboarding/OnboardingProvider";
 import {
   LineChart,
   Line,
@@ -312,14 +313,19 @@ function PresetAppliedBanner() {
 
 function PasteCSVResults() {
   const { status, analysis, cached, rowsCount, reset } = usePasteCSV();
+  useEffect(() => {
+    if (status === "done") emitTaskComplete("paste-csv");
+  }, [status]);
   return (
-    <PasteCSVBanner
-      status={status}
-      analysis={analysis}
-      cached={cached}
-      rowsCount={rowsCount}
-      onReset={reset}
-    />
+    <div data-spotlight="paste-csv">
+      <PasteCSVBanner
+        status={status}
+        analysis={analysis}
+        cached={cached}
+        rowsCount={rowsCount}
+        onReset={reset}
+      />
+    </div>
   );
 }
 
@@ -429,7 +435,7 @@ export default function Dashboard() {
       </div>
 
       {/* FROZEN MODE BADGE (Annex 22 compliance) */}
-      <div className="px-4 lg:px-8 mb-3">
+      <div className="px-4 lg:px-8 mb-3" data-spotlight="frozen-badge">
         <FrozenModeBadge />
       </div>
 

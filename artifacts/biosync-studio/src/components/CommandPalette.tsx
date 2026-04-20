@@ -1,6 +1,7 @@
 import { Command } from "cmdk";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
+import { useOnboarding } from "../hooks/useOnboarding";
 
 interface PaletteItem {
   id: string;
@@ -19,6 +20,7 @@ interface Props {
 export default function CommandPalette({ basePath = "" }: Props) {
   const [open, setOpen] = useState(false);
   const [, navigate] = useLocation();
+  const { openHelp, restart } = useOnboarding();
 
   // Global keyboard shortcut ⌘K / Ctrl+K
   useEffect(() => {
@@ -41,6 +43,10 @@ export default function CommandPalette({ basePath = "" }: Props) {
   };
 
   const items: PaletteItem[] = [
+    // Ayuda / Tour (primer grupo — siempre visible)
+    { id: "help-open", group: "Ayuda", icon: "🆘", label: "Abrir ayuda", hint: "⌘? · tour, docs, contacto", action: () => { setOpen(false); openHelp(); }, keywords: "help ayuda ? question docs" },
+    { id: "help-restart-tour", group: "Ayuda", icon: "▶️", label: "Reiniciar tour", hint: "Re-abre welcome + checklist", action: () => { setOpen(false); restart(); }, keywords: "tour onboarding restart reset reiniciar" },
+
     // Nav
     { id: "nav-home", group: "Ir a", icon: "🏠", label: "Inicio", hint: "Landing + hero", action: () => go("/"), keywords: "home landing" },
     { id: "nav-dash", group: "Ir a", icon: "📊", label: "Dashboard de Biorreactor", hint: "KPIs en vivo + IA recomendaciones", action: () => go("/dashboard"), keywords: "monitor kpi metrics sensor" },
