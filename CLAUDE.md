@@ -147,6 +147,8 @@ Código completo del prototipo listo para flipear a producción cuando haya `az 
 
 **Principio:** nada se bloquea por falta de credenciales. Correr `pnpm --filter @workspace/api-server start` con `.env` vacío → mock mode. Pegar API key → real mode. Zero code change. Ver `DEPLOY.md` para flip production.
 
+**Deploy target 2026-04:** **Replit Core $20/mo** (NO Azure — no hay créditos). 3 deployments: Landing (Static, gratis) + biosync-studio (Static, gratis) + api-server (Autoscale, scale-to-zero). DB opcional Neon 512 MB free. LLM opcional OpenAI direct (pay-per-token). Mock mode es el default — demo funciona sin credenciales. Costo esperado pitch: $20/mo. Beta 50 labs: $25-35/mo.
+
 ## Marketing & Discovery (launch 2026-04-22)
 
 Fundadora: **Manuela Orozco** (Ingeniera Biológica + Analytics Engineer, 5 años).

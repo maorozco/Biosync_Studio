@@ -1,283 +1,317 @@
-# DEPLOY.md — plan de producción "listo cuando hagan `az login`"
+# DEPLOY.md — BioSync Studio · Replit Core ($20/mo)
 
-> El proyecto está **construido para funcionar en local sin credenciales** (mock mode en landing, api-server y biosync-studio). Cuando Manu/Justin tengan `az login` + deployments Azure, SOLO hace falta setear env vars + deploy artifacts. Cero código nuevo.
+> **Pivote 2026-04-21:** no hay créditos de Azure. Todo se adapta a **Replit Core ($20/mo)** + lo que Replit ofrece por la subscripción. Zero code change desde el sprint — sólo env vars + deploy.
 >
-> **Estado hoy (T-3 2026-04-19):**
-> - Landing (`artifacts/landing/`): Vite SPA + Playwright 4/4 ✓ + hedging aplicado
-> - Api-server (`artifacts/api-server/`): Express 5 + Drizzle + RAG mock-mode ✓ + endpoints Asistente/Waitlist/Insights ✓
-> - Biosync-studio (`artifacts/biosync-studio/`): Asistente real con SSE streaming + citation cards + Dashboard widget pain-points ✓
-> - DB schema: `lib/db/src/schema/index.ts` — 5 tablas + pgvector + tipos Drizzle
-> - Scripts: `scripts/src/scrape-reddit.ts` (standalone Apify CLI)
+> **Estado actual del código** (todos commits al día):
+> - Landing (`artifacts/landing/`): Vite SPA · Playwright 4/4 ✓
+> - biosync-studio (`artifacts/biosync-studio/`): React 19 · 32/32 Playwright ✓ · 10 features signature
+> - api-server (`artifacts/api-server/`): Express 5 · RAG SSE · mock mode default · **soporta OpenAI direct Y Azure, no requiere Azure**
+> - DB schema (`lib/db/`): Drizzle + pgvector (lazy-init, mock-ready)
+>
+> **Regla central:** mock mode funciona sin credenciales. Para producción, solo necesitás lo que cabe en $20/mo Replit Core + opcional OpenAI direct (pay-per-token).
 
 ---
 
-## 0 · Correr todo en local (sin credenciales)
+## 1 · Lo que Replit Core ($20/mo) te da
+
+Verificado en replit.com/pricing (abril 2026):
+
+- **Unlimited Autoscale Deployments** (pay-per-compute ~$0.00001/CPU-s, cents/mes a bajo tráfico)
+- **Static Deployments** gratis dentro del plan
+- **Reserved VM** desde $7/mo si necesitás proceso 24/7 (no usamos hoy)
+- **Storage 10 GB** (archivos + DBs)
+- **Replit Agent** credits incluidos ($25/mo valor)
+- **Private Repls** ilimitados
+- **Secrets** panel (env vars encriptados — nuestro Key Vault sustituto)
+
+Lo que NO incluye:
+- **Replit Postgres** — integración con Neon (plan gratis 512 MB es suficiente para MVP) o $15+/mo.
+- **LLM** — Replit NO es proveedor de API LLM general. Para IA real usamos OpenAI/Claude API direct, pagando nosotros los tokens (mock mode fallback defecto).
+
+---
+
+## 2 · Arquitectura target (Replit-only)
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                   BIOSYNC · REPLIT CORE $20/mo                │
+└──────────────────────────────────────────────────────────────┘
+
+   GitHub main ──→ auto-deploy via Replit GitHub connect
+
+   ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+   │ Static · landing│    │ Static · studio │    │ Autoscale · API │
+   │ (biosync.studio)│    │  (app.biosync...)│    │ (api.biosync...)│
+   │    Vite build   │    │    Vite build   │    │ Express 5 esbuild│
+   │    → dist/      │    │    → dist/public│    │    → dist/       │
+   └─────────────────┘    └─────────────────┘    └────────┬────────┘
+                                                           │
+                       ┌───────────────────────────────────┼───────────────────────────────┐
+                       │                                   │                               │
+                       ▼                                   ▼                               ▼
+               ┌───────────────┐                   ┌───────────────┐              ┌───────────────┐
+               │ Neon Postgres │                   │ Replit Secrets│              │ OpenAI API    │
+               │ (free 512 MB) │                   │  OPENAI_KEY   │              │  direct       │
+               │ o Replit DB   │                   │  DATABASE_URL │              │ (opcional, pay│
+               │  key-value    │                   │  APIFY_KEY    │              │  per-token)   │
+               └───────────────┘                   └───────────────┘              └───────────────┘
+
+   Mock mode (defecto · zero cost):
+   • Si DATABASE_URL vacío  → waitlist + signups in-memory
+   • Si OPENAI_API_KEY vacío → Asistente usa corpus offline + cache 10 queries pre-validadas
+   • Todas las demos del pitch funcionan sin credenciales
+```
+
+---
+
+## 3 · Costo mensual estimado (3 escenarios)
+
+| Escenario | Replit Core | Postgres | LLM | Total |
+|---|---|---|---|---|
+| **Pitch-only (mock mode)** | $20 | $0 (no DB) | $0 (corpus offline) | **$20** |
+| **Beta 50 labs (opcional OpenAI)** | $20 | $0 (Neon free 512 MB) | ~$5-15 (gpt-4o-mini prompt-cached) | **$25-35** |
+| **Post-launch SMB** | $20 + $7 Reserved VM | $15 Neon Pro | ~$30-80 (según demo load) | **$72-122** |
+
+Para T-0 pitch, escenario #1 alcanza. Mock mode tiene:
+- 22 entries de corpus curado (`artifacts/api-server/src/data/pain-corpus.json`)
+- 10 queries pre-cacheadas con respuestas validadas (`rag-cache.json`)
+- Keyword Jaccard matching — responde en <100ms
+- Zero dependency externa
+
+---
+
+## 4 · Deploy paso-a-paso (T-0 ready)
+
+### Step 1 · Subir el monorepo a Replit (1 Repl raíz)
 
 ```bash
-# 1. Install
+# En Replit:
+Create Repl → Import from GitHub → pegá la URL del repo
+```
+
+Replit detecta automáticamente el monorepo pnpm. Run `pnpm install` en la shell.
+
+### Step 2 · Configurar Secrets (Replit → Tools → Secrets)
+
+**Para mock mode (recomendado para pitch):**
+
+| Secret | Valor | ¿Para qué? |
+|---|---|---|
+| `PORT` | `3002` | Puerto del api-server |
+| `CORS_ORIGINS` | `https://<landing-replit-url>,https://bio-sync-stu.replit.app` | Allowlist CORS |
+| `VITE_API_URL` | `https://<api-replit-url>` | Landing + studio apuntan al api-server |
+| `VITE_COUNTER_BASELINE` | `25` | Floor del contador de waitlist |
+
+**Para real mode (opcional, cuando quieran gastar):**
+
+| Secret | Valor |
+|---|---|
+| `DATABASE_URL` | `postgres://...neon.tech/...?sslmode=require` (Neon free tier) |
+| `OPENAI_API_KEY` | `sk-...` de platform.openai.com |
+| `OPENAI_CHAT_MODEL` | `gpt-4o-mini` (default; cambiarlo solo si querés upgrade) |
+| `OPENAI_EMBED_MODEL` | `text-embedding-3-small` (default) |
+
+**Importante:** NO necesitás `AZURE_OPENAI_*` — el código las soporta pero son opcionales. OpenAI direct es más simple.
+
+### Step 3 · Configurar 3 Deployments (Replit → Deployments)
+
+Replit soporta múltiples deployments desde un mismo Repl. Crear tres:
+
+#### Deployment A — Landing (Static, gratis en Core)
+
+```
+Tipo: Static
+Build command: pnpm install && pnpm --filter @workspace/landing build
+Output directory: artifacts/landing/dist
+Env vars:
+  VITE_API_URL = https://<api-replit-url>
+```
+
+URL: `biosync-landing.<username>.replit.app` → apuntar dominio `biosync.studio` acá.
+
+#### Deployment B — biosync-studio (Static, gratis en Core)
+
+```
+Tipo: Static
+Build command: PORT=3000 BASE_PATH=/ pnpm install && pnpm --filter @workspace/biosync-studio build
+Output directory: artifacts/biosync-studio/dist/public
+Env vars:
+  VITE_API_URL = https://<api-replit-url>
+```
+
+URL: `bio-sync-stu.<username>.replit.app` (ya existe, solo actualizar build).
+
+#### Deployment C — api-server (Autoscale, pay-per-request)
+
+```
+Tipo: Autoscale
+Build command: pnpm install && pnpm --filter @workspace/api-server build
+Run command: pnpm --filter @workspace/api-server start
+Port: 3002 (matches PORT secret)
+Min instances: 0  # scale-to-zero — sólo gastás cuando hay tráfico
+Max instances: 3  # protección contra runaway cost
+```
+
+URL: `biosync-api.<username>.replit.app`
+
+**Costo estimado Autoscale:** scale-to-zero = $0 cuando no hay requests. En pitch día con ~50 requests demo, costo <$0.10.
+
+### Step 4 · (Opcional) Conectar Neon Postgres
+
+Si querés persistir waitlist + Reddit scrapes:
+
+1. Ir a neon.tech → Create project (free tier 512 MB)
+2. Copiar connection string (incluye `?sslmode=require`)
+3. Replit → Tools → Secrets → `DATABASE_URL` = <connection-string>
+4. En Replit shell:
+   ```bash
+   # Habilitar pgvector (Neon lo soporta nativo)
+   psql "$DATABASE_URL" -c "CREATE EXTENSION IF NOT EXISTS vector;"
+   # Push schema Drizzle
+   pnpm --filter @workspace/db push
+   ```
+5. Re-deploy api-server → ahora usa DB real en vez de in-memory.
+
+Alternativa más simple: **Replit DB** (key-value incluido en Core). Adaptar `waitlist` router para usar Replit DB en vez de Postgres. No necesario para pitch.
+
+### Step 5 · (Opcional) Conectar OpenAI para Asistente real
+
+Si querés que el Asistente haga embeddings + completions reales en vez de usar el corpus offline:
+
+1. Crear cuenta platform.openai.com → Billing → añadir método de pago ($5 inicial)
+2. API Keys → Create → copiar `sk-...`
+3. Replit → Secrets → `OPENAI_API_KEY` = `sk-...`
+4. Re-deploy api-server. El Asistente automáticamente detecta la key y switchea a real mode.
+
+**Costo esperado T-0 pitch:** $1-3 (con prompt caching agresivo).
+**Costo beta 50 labs x 90 días:** $10-40 total.
+
+### Step 6 · Custom domain `biosync.studio`
+
+```
+Replit → Deployment A (Landing) → Domains → Add custom domain
+→ biosync.studio
+→ Copiar los DNS records (A/CNAME/TXT) al registrar del dominio
+→ Wait DNS propagation (5-30 min)
+→ Replit issues SSL cert automáticamente (Let's Encrypt)
+```
+
+Repetir para `app.biosync.studio` → Deployment B y `api.biosync.studio` → Deployment C.
+
+---
+
+## 5 · Comparativa rápida: Replit vs Azure (para tu tranquilidad)
+
+| Capacidad | Azure (lo que perdimos) | Replit $20/mo (lo que tenemos) |
+|---|---|---|
+| Frontend hosting | Static Web Apps free | Static deployment gratis |
+| Backend hosting | Container Apps | Autoscale deployment |
+| Postgres | Azure DB Flexible ($12.41/mo) | Neon integration (free 512 MB) |
+| pgvector | Via azure.extensions | Native Neon ✓ |
+| LLM | Azure OpenAI (enterprise) | OpenAI direct (simpler, pay-per-token) |
+| Secrets | Key Vault (free tier) | Secrets panel (free) |
+| Observability | Application Insights | Replit logs + metrics dashboard |
+| Custom domain | Free + auto SSL | Free + auto SSL |
+| Auto-deploy GitHub | Requires Actions | Native integration |
+| CI/CD setup | ~2-4h | ~15 min |
+
+**Lo único que perdimos:** el marketing point "corriendo en Azure enterprise-grade". Lo reemplazamos con: **"arquitectura portable — mismo código en Replit hoy, Azure o AWS mañana cuando los clientes lo pidan"**. Honestamente, para SMB target del pitch, Replit transmite "velocidad + pragmatism" más que Azure transmite "pesadez enterprise".
+
+---
+
+## 6 · Script de deploy 15-min (T-0 morning)
+
+Si nunca se hizo deploy a Replit, seguí este orden:
+
+```bash
+# 1. En el Repl de BioSync:
 pnpm install
+pnpm run typecheck:libs  # tsc --build de lib/db + lib/api-zod
+pnpm --filter @workspace/biosync-studio typecheck
+pnpm --filter @workspace/landing typecheck
+pnpm --filter @workspace/api-server typecheck
 
-# 2. Terminal A — api-server (mock mode)
-pnpm --filter @workspace/api-server build
-PORT=3002 pnpm --filter @workspace/api-server start
+# 2. Builds
+pnpm --filter @workspace/landing build  # dist/
+pnpm --filter @workspace/biosync-studio build  # dist/public/
+pnpm --filter @workspace/api-server build  # dist/index.mjs (esbuild bundle)
 
-# 3. Terminal B — landing (mock mode)
-PORT=3001 pnpm --filter @workspace/landing dev
+# 3. En Replit UI, crear los 3 Deployments arriba (Step 3)
+# 4. Configurar Secrets (Step 2)
+# 5. Click "Deploy" en cada uno (Landing + studio ~1 min · api 30s)
 
-# 4. Terminal C — biosync-studio con api-server wire-up
-PORT=3000 BASE_PATH=/ VITE_API_URL=http://localhost:3002 pnpm --filter @workspace/biosync-studio dev
-
-# 5. Smoke tests
-curl http://localhost:3002/healthz
-curl http://localhost:3002/api/asistente/status
-curl -X POST http://localhost:3002/api/asistente/ask \
+# 6. Smoke tests (reemplazar URLs con tus deployments)
+curl https://<api-url>/healthz
+# → {"ok":true}
+curl https://<api-url>/api/asistente/status
+# → {"mock":true,"llm":"none","corpus_size":22}  (o "openai" si pusiste key)
+curl -X POST https://<api-url>/api/asistente/ask \
   -H "content-type: application/json" \
-  -d '{"q":"perdí pH en mi reactor a las 3am","lang":"es"}'
+  -d '{"q":"perdí pH a las 3am","lang":"es"}'
+# → SSE stream con tokens + citations
 ```
 
-Todo responde. El Asistente usa el **corpus offline** + cache de 10 respuestas pre-validadas. Sin LLM externo.
+Si algo falla: `Replit Console → Logs` muestra stderr de los 3 deployments.
 
 ---
 
-## 1 · Cuando tengan `az login` (production flip)
+## 7 · Fallback + rollback
 
-### Step 1 — Provisión Azure
+**Si Replit falla T-0:**
+- El código corre 100% en local con `pnpm dev`. Laptop con hotspot del celular = backup.
+- Video backup 30s en `marketing/pitch-video-backup-*.mp4` (grabados T-2).
 
-```bash
-az login
-az account set --subscription <subscription-id>
+**Si OpenAI falla T-0 (rate limit / down):**
+- Api-server detecta fallo → cae a mock mode automáticamente (cache 10 queries pre-validadas).
+- Demo no depende del LLM live.
 
-RG=biosync-studio-rg
-LOC=eastus2
+**Si Neon falla T-0 (raro, free tier):**
+- Api-server con `DATABASE_URL` unreachable → logs warning + cae a in-memory.
+- Waitlist temporalmente no-persistente, pero demo sobrevive.
 
-az group create --name $RG --location $LOC
+---
 
-# Postgres Flexible Server (B1ms — $12.41/mo, 2GB RAM, pgvector soportado)
-az postgres flexible-server create \
-  --resource-group $RG \
-  --name biosync-db \
-  --sku-name Standard_B1ms \
-  --tier Burstable \
-  --version 16 \
-  --admin-user bsadmin \
-  --admin-password "<strong-password>" \
-  --public-access 0.0.0.0 \
-  --storage-size 32
+## 8 · Env vars matrix (cheatsheet bolsillo)
 
-# Enable pgvector extension
-az postgres flexible-server parameter set \
-  --resource-group $RG \
-  --server-name biosync-db \
-  --name azure.extensions \
-  --value vector
-
-# Container Apps env + Container Registry
-az containerapp env create \
-  --name biosync-env \
-  --resource-group $RG \
-  --location $LOC
-
-az acr create --resource-group $RG --name biosyncstudio --sku Basic --admin-enabled true
-
-# Azure OpenAI — crear resource en el portal primero, luego desplegar los 2 modelos:
-#   gpt-4o-mini (deployment name: gpt-4o-mini)
-#   text-embedding-3-small (deployment name: text-embed-3-small)
-# Ver: https://portal.azure.com → Azure OpenAI → Deployments
-
-# Key Vault
-az keyvault create --name biosync-kv --resource-group $RG --location $LOC
-az keyvault secret set --vault-name biosync-kv --name openai-key --value "<key>"
-az keyvault secret set --vault-name biosync-kv --name openai-endpoint --value "https://<name>.openai.azure.com/"
-az keyvault secret set --vault-name biosync-kv --name db-url --value "postgres://bsadmin:<pass>@biosync-db.postgres.database.azure.com:5432/postgres?sslmode=require"
-az keyvault secret set --vault-name biosync-kv --name apify-key --value "<apify-api-key>"
 ```
-
-### Step 2 — Push DB schema
-
-```bash
-export DATABASE_URL="postgres://bsadmin:<pass>@biosync-db.postgres.database.azure.com:5432/postgres?sslmode=require"
-
-# Connect manualmente para crear la extension (solo 1x)
-psql "$DATABASE_URL" -c "CREATE EXTENSION IF NOT EXISTS vector;"
-
-pnpm --filter @workspace/db push
-```
-
-### Step 3 — Build + push api-server image
-
-```bash
-cd artifacts/api-server
-pnpm build
-
-# Dockerfile (crear manualmente si no existe — ver §5 abajo)
-az acr build --registry biosyncstudio --image api-server:latest .
-```
-
-### Step 4 — Deploy Container App
-
-```bash
-az containerapp create \
-  --resource-group $RG \
-  --name biosync-api \
-  --environment biosync-env \
-  --image biosyncstudio.azurecr.io/api-server:latest \
-  --ingress external \
-  --target-port 3002 \
-  --min-replicas 0 \
-  --max-replicas 3 \
-  --secrets \
-    openai-key=keyvaultref:https://biosync-kv.vault.azure.net/secrets/openai-key,identityref:system \
-    openai-endpoint=keyvaultref:https://biosync-kv.vault.azure.net/secrets/openai-endpoint,identityref:system \
-    db-url=keyvaultref:https://biosync-kv.vault.azure.net/secrets/db-url,identityref:system \
-  --env-vars \
-    PORT=3002 \
-    NODE_ENV=production \
-    DATABASE_URL=secretref:db-url \
-    AZURE_OPENAI_API_KEY=secretref:openai-key \
-    AZURE_OPENAI_ENDPOINT=secretref:openai-endpoint \
-    AZURE_OPENAI_CHAT_DEPLOYMENT=gpt-4o-mini \
-    AZURE_OPENAI_EMBED_DEPLOYMENT=text-embed-3-small \
-    CORS_ORIGINS=https://biosync.studio,https://bio-sync-stu.replit.app,https://biosync-landing.azurestaticapps.net
-
-# URL queda en: https://biosync-api.<region>.azurecontainerapps.io
-```
-
-### Step 5 — Landing → Static Web Apps
-
-```bash
-cd artifacts/landing
-pnpm build  # → dist/
-
-# Azure Static Web Apps via CLI:
-az staticwebapp create \
-  --name biosync-landing \
-  --resource-group $RG \
-  --location westus2 \
-  --sku Free
-
-# O mejor: conectar GitHub Actions. En el portal → Azure Static Web Apps → Source → GitHub.
-# Build command: pnpm install && pnpm --filter @workspace/landing build
-# Output dir: artifacts/landing/dist
-
-# Setear env var para que apunte al API:
-az staticwebapp appsettings set \
-  --name biosync-landing \
-  --setting-names VITE_API_URL=https://biosync-api.<region>.azurecontainerapps.io
-```
-
-### Step 6 — Biosync-studio
-
-Opción A — mantener en Replit (el MVP ya está vivo en `bio-sync-stu.replit.app`). Solo setear secret:
-- Replit → Secrets → `VITE_API_URL=https://biosync-api.<region>.azurecontainerapps.io`
-- Re-deploy.
-
-Opción B — mover a Azure Static Web Apps (mismo patrón que landing).
-
-### Step 7 — Seed corpus embeddings (una sola vez)
-
-```bash
-# Después de que DB + Azure OpenAI estén up:
-export DATABASE_URL=...
-export AZURE_OPENAI_API_KEY=...
-export AZURE_OPENAI_ENDPOINT=...
-
-# TODO: scripts/src/seed-embeddings.ts (pendiente — el api-server ya embed on-the-fly,
-# solo necesario si querés persistir para pgvector queries masivos).
-```
-
-### Step 8 — Manual Reddit scrape (populate pain points widget)
-
-```bash
-export APIFY_API_KEY=<key>
-export DATABASE_URL=<azure-pg-url>
-
-pnpm --filter @workspace/scripts exec tsx src/scrape-reddit.ts --persist --limit=100
-```
-
-Esto:
-1. Corre el actor `practicaltools/apify-reddit-api` (costo ≈ $2 por 1,000 posts).
-2. Inserta en `reddit_posts` table.
-3. El api-server `/api/insights/pain-points` empezará a devolver data real en vez del mock.
-
-### Step 9 — DNS
-
-```bash
-# Comprar dominio biosync.studio (si aún no está)
-# Crear CNAME record: biosync.studio → <app>.azurestaticapps.net
-# Replit también permite custom domain si biosync-studio queda ahí.
+┌─────────────────────────┬────────────┬────────────┬────────────────┐
+│ Secret                  │ Local      │ Replit Dev │ Replit Prod    │
+├─────────────────────────┼────────────┼────────────┼────────────────┤
+│ PORT                    │ 3002       │ 3002       │ 3002           │
+│ DATABASE_URL            │ (vacío)    │ (vacío)    │ neon://... opt │
+│ OPENAI_API_KEY          │ (vacío)    │ opt        │ sk-... opt     │
+│ CORS_ORIGINS            │ (vacío)    │ replit url │ biosync.studio │
+│ VITE_API_URL (SPA)      │ localhost  │ replit api │ api.biosync... │
+│ VITE_COUNTER_BASELINE   │ 25         │ 25         │ 25             │
+│ APIFY_API_KEY (scripts) │ opt        │ opt        │ opt            │
+└─────────────────────────┴────────────┴────────────┴────────────────┘
 ```
 
 ---
 
-## 2 · Smoke tests production
+## 9 · Adiós Azure (solo mental)
 
-```bash
-API=https://biosync-api.<region>.azurecontainerapps.io
+Lo que tenías planeado en Azure (versión anterior de este doc):
+- ~~Azure DB Flexible Postgres B1ms~~ → Neon free 512 MB
+- ~~Azure Container Apps environment~~ → Replit Autoscale
+- ~~Azure Container Registry~~ → no necesario (Replit build in-place)
+- ~~Azure OpenAI + deployments~~ → OpenAI direct API (opcional)
+- ~~Azure Key Vault~~ → Replit Secrets
+- ~~Azure Functions timer trigger (scrape cron)~~ → manual scrape con `pnpm scrape-reddit` o Replit Scheduled Deployment
 
-curl $API/healthz
-# Expected: {"ok":true}
-
-curl $API/api/asistente/status
-# Expected: {"mock":false,"llm":"azure","corpus_size":22}
-
-curl -X POST $API/api/asistente/ask \
-  -H "content-type: application/json" \
-  -d '{"q":"cuánto cuesta benchling","lang":"es"}'
-# Expected: SSE stream, <3s, 3+ citations con URLs válidas
-
-curl $API/api/waitlist/count
-# Expected: {"count":<N>,"mock":false}  con N ≥ 25 baseline
-```
+Zero cambios de código. El api-server detecta env vars y decide branch:
+- `isLlmConfigured()` ya soporta OPENAI_API_KEY ∨ AZURE_OPENAI_API_KEY
+- `isDbConfigured()` ya soporta DATABASE_URL (Neon o Azure o local Postgres, todo Postgres)
+- Mock fallback en todas las rutas
 
 ---
 
-## 3 · Matriz env vars por environment
+## 10 · TL;DR
 
-| Var | Local (mock) | Dev (Replit) | Prod (Azure) |
-|---|---|---|---|
-| `DATABASE_URL` | _vacío_ | _vacío_ | `postgres://...azure.com...` |
-| `OPENAI_API_KEY` | _vacío_ | opcional (OpenAI direct) | _vacío_ (usamos Azure) |
-| `AZURE_OPENAI_API_KEY` | _vacío_ | _vacío_ | `secretref:openai-key` |
-| `AZURE_OPENAI_ENDPOINT` | _vacío_ | _vacío_ | `secretref:openai-endpoint` |
-| `CORS_ORIGINS` | _vacío_ (open) | `https://bio-sync-stu.replit.app` | `https://biosync.studio,...` |
-| `VITE_API_URL` (landing + biosync-studio) | _vacío_ (mock) | `http://localhost:3002` | `https://biosync-api.<region>.azurecontainerapps.io` |
-| `APIFY_API_KEY` (scripts only) | _opcional_ | _opcional_ | Key Vault |
+1. Deploy target ahora es **Replit Core $20/mo** + opcional OpenAI direct.
+2. **Zero code change**. Sólo env vars + 3 deployments en Replit UI.
+3. Mock mode es el default — demo funciona sin credenciales externas.
+4. Costo esperado pitch = $20/mo. Beta 50 labs = $25-35/mo. Todo manejable.
+5. Cuando crezcamos a Series A, reabrimos la puerta Azure — el código está listo para ambos.
 
----
-
-## 4 · Rollback / fallback
-
-Si Azure falla T-0 antes del pitch:
-1. Landing y biosync-studio ya funcionan en mock mode — el Asistente usa el corpus offline + cache de 10 respuestas. Demo NO depende de Azure.
-2. Cambiar `VITE_API_URL` a vacío → cliente cae a mock. Zero deploy needed.
-3. Video backup en `marketing/pitch-video-backup-*.mp4`.
-
----
-
-## 5 · Dockerfile api-server (crear cuando se haga deploy)
-
-```dockerfile
-# artifacts/api-server/Dockerfile
-FROM node:24-alpine AS builder
-WORKDIR /app
-RUN corepack enable pnpm
-COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
-COPY tsconfig.base.json tsconfig.json ./
-COPY artifacts/api-server artifacts/api-server
-COPY lib lib
-RUN pnpm install --frozen-lockfile
-RUN pnpm --filter @workspace/api-server build
-
-FROM node:24-alpine
-WORKDIR /app
-COPY --from=builder /app/artifacts/api-server/dist ./dist
-EXPOSE 3002
-ENV PORT=3002
-CMD ["node", "--enable-source-maps", "./dist/index.mjs"]
-```
-
-Guardar como `artifacts/api-server/Dockerfile` cuando arranque el deploy real.
-
----
-
-**Regla:** este doc es la única fuente de verdad para el flip prod. Si algo se desvía, actualizar acá primero.
+**Pitch narrative update:** si un jurado pregunta "¿dónde corre?" → "Replit hoy, cualquier cloud mañana — el código es portable porque cada dependencia tiene un fallback mock". Eso es una fortaleza arquitectónica, no una debilidad.
