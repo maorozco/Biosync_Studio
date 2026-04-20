@@ -6,7 +6,18 @@
     "tags": ["ph", "drift", "contamination", "feed", "acetato"],
     "source_url": "https://www.bioprocessonline.com/doc/troubleshooting-bacterial-contamination-in-bioreactors-0001",
     "source_name": "James Blackwell · BioProcessOnline",
-    "audience": "biomfg"
+    "audience": "biomfg",
+    "recommendations": {
+      "title": "Ajustes recomendados para recuperar pH",
+      "confidence": 0.82,
+      "setpoints": { "ph": 7.0, "temp": 37.0, "do": 45, "rpm": 500 },
+      "actions": [
+        "Bajar feed rate 30% por 45 min",
+        "Verificar glucosa residual <5 g/L",
+        "Muestra microscopía si pH <6.8"
+      ],
+      "preset_id": "ph-recovery-ecoli"
+    }
   },
   {
     "id": "q-do-crash",
@@ -15,7 +26,18 @@
     "tags": ["do", "dissolved-oxygen", "crash", "feed", "rpm", "antifoam"],
     "source_url": "https://www.bioprocessintl.com/process-development/doe-helps-optimize-a-cell-culture-bioproduction-system",
     "source_name": "Steve Peppers · BioProcess International",
-    "audience": "biomfg"
+    "audience": "biomfg",
+    "recommendations": {
+      "title": "Ajustes para recuperar DO",
+      "confidence": 0.79,
+      "setpoints": { "ph": 7.2, "temp": 37.0, "do": 40, "rpm": 600 },
+      "actions": [
+        "Subir RPM 15% antes de tocar feed",
+        "Verificar espuma — dosis antifoam 0.5 mL/L si hay",
+        "Reducir feed 25% si DO sigue <20% después de 15 min"
+      ],
+      "preset_id": "do-recovery"
+    }
   },
   {
     "id": "q-scale-up-5l-50l",
@@ -24,7 +46,18 @@
     "tags": ["scale-up", "kla", "p/v", "gradients", "mixing-time"],
     "source_url": "https://www.bioprocessintl.com/bioanalytical-methods/biotech-facilities-average-a-batch-failure-every-40-6-weeks",
     "source_name": "Beth Junker · Merck R&D",
-    "audience": "biomfg"
+    "audience": "biomfg",
+    "recommendations": {
+      "title": "Setpoints sugeridos para scale-up 5L → 50L",
+      "confidence": 0.76,
+      "setpoints": { "ph": 7.2, "temp": 37.0, "do": 40, "rpm": 450 },
+      "actions": [
+        "Mantené kLa constante (calculá con ungassed holdup test)",
+        "Tracer dye test — tiempo mezcla <30s",
+        "Verificá gradientes DO/pH antes de scale"
+      ],
+      "preset_id": "scale-up-5l-50l"
+    }
   },
   {
     "id": "q-contamination-cost",

@@ -41,8 +41,8 @@ test.describe("Asistente (/asistente) — RAG con citas", () => {
     await expect(page.getByText(/mock/i).first()).toBeVisible({
       timeout: 10_000,
     });
-    // Al menos una citation card se muestra con link
-    await expect(page.getByRole("link").filter({ hasText: /BioProcess|Blackwell/i })).toBeVisible({
+    // Al menos una citation card se muestra con link (puede haber múltiples: citation card + citation graph legend + SVG link)
+    await expect(page.getByRole("link").filter({ hasText: /BioProcess|Blackwell/i }).first()).toBeVisible({
       timeout: 10_000,
     });
   });
@@ -54,7 +54,7 @@ test.describe("Asistente (/asistente) — RAG con citas", () => {
     await expect(page.getByText(/246K|246,000/i).first()).toBeVisible({
       timeout: 10_000,
     });
-    await expect(page.getByRole("link").filter({ hasText: /Studebaker|LinkedIn/i })).toBeVisible({
+    await expect(page.getByRole("link").filter({ hasText: /Studebaker|LinkedIn/i }).first()).toBeVisible({
       timeout: 10_000,
     });
   });

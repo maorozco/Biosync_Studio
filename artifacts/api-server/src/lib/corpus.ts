@@ -5,6 +5,19 @@
 import corpusData from "../data/pain-corpus.json";
 import cacheData from "../data/rag-cache.json";
 
+export interface Recommendation {
+  title: string;
+  confidence: number;
+  setpoints?: {
+    ph?: number;
+    temp?: number;
+    do?: number;
+    rpm?: number;
+  };
+  actions?: string[];
+  preset_id?: string;
+}
+
 export interface CorpusEntry {
   id: string;
   type: "answer" | "quote";
@@ -13,6 +26,8 @@ export interface CorpusEntry {
   source_url: string;
   source_name: string;
   audience: "biomfg" | "waste-general";
+  /** Tool-use style — setpoints + actions recomendadas. Se emiten como SSE event "recommendations" */
+  recommendations?: Recommendation;
   /** populated lazily by embedder; never serialized */
   embedding?: number[];
 }

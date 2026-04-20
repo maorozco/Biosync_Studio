@@ -18,6 +18,21 @@ export interface Citation {
   similarity: number;
 }
 
+export interface Recommendation {
+  title: string;
+  confidence: number;
+  setpoints?: {
+    ph?: number;
+    temp?: number;
+    do?: number;
+    rpm?: number;
+  };
+  actions?: string[];
+  preset_id?: string;
+  source_id?: string;
+  source_name?: string;
+}
+
 export interface PainPoint {
   category: string;
   count: number;
@@ -29,8 +44,39 @@ export interface PainPoint {
 // Mock fallbacks (used only when API_URL is unset)
 // ---------------------------------------------------------------------------
 
-const MOCK_FALLBACK_ANSWERS: Array<{ match: RegExp; answer: string; citations: Citation[] }> = [
+const MOCK_FALLBACK_RECS: Record<string, Recommendation> = {
+  ph: {
+    title: "Ajustes recomendados para recuperar pH",
+    confidence: 0.82,
+    setpoints: { ph: 7.0, temp: 37.0, do: 45, rpm: 500 },
+    actions: [
+      "Bajar feed rate 30% por 45 min",
+      "Verificar glucosa residual <5 g/L",
+      "Muestra microscopía si pH <6.8",
+    ],
+    preset_id: "ph-recovery-ecoli",
+  },
+  "scale-up": {
+    title: "Setpoints sugeridos para scale-up 5L → 50L",
+    confidence: 0.76,
+    setpoints: { ph: 7.2, temp: 37.0, do: 40, rpm: 450 },
+    actions: [
+      "Mantené kLa constante",
+      "Tracer dye test — tiempo mezcla <30s",
+      "Verificá gradientes DO/pH antes de scale",
+    ],
+    preset_id: "scale-up-5l-50l",
+  },
+};
+
+const MOCK_FALLBACK_ANSWERS: Array<{
+  match: RegExp;
+  answer: string;
+  citations: Citation[];
+  recKey?: keyof typeof MOCK_FALLBACK_RECS;
+}> = [
   {
+    recKey: "ph",
     match: /ph.*(3 ?am|noche|madrugada|drift|deriv|bajo|baj[oó]|cay)/i,
     answer:
       "Si el pH bajó rápidamente, lo más probable es acumulación de ácido orgánico (acetato, lactato) por glucosa excedente. Acciones: (1) medir glucosa residual; si >8 g/L el feed está sobre-inyectando. (2) bajar feed rate 30% o pausar 20 min. (3) si continúa bajando a pesar del feed-stop, sospechar contaminación bacteriana — tomar muestra para microscopía.",
@@ -73,6 +119,7 @@ const MOCK_FALLBACK_ANSWERS: Array<{ match: RegExp; answer: string; citations: C
     ],
   },
   {
+    recKey: "scale-up",
     match: /scale.?up|escal|50l|5l.*50|pilot/i,
     answer:
       "Scale-up de 5L a 50L: mantené kLa constante (no rpm constante — la física cambia). P/V (potencia por volumen) es proxy razonable. Verificá: tiempo de mezcla (en 50L puede duplicarse), gradientes locales de DO/pH (pueden diferir 10-15%), shear stress si bajaste rpm.",
@@ -88,9 +135,15 @@ const MOCK_FALLBACK_ANSWERS: Array<{ match: RegExp; answer: string; citations: C
   },
 ];
 
-function mockAnswer(query: string): { answer: string; citations: Citation[] } {
+function mockAnswer(query: string): { answer: string; citations: Citation[]; recommendation?: Recommendation } {
   for (const entry of MOCK_FALLBACK_ANSWERS) {
-    if (entry.match.test(query)) return { answer: entry.answer, citations: entry.citations };
+    if (entry.match.test(query)) {
+      return {
+        answer: entry.answer,
+        citations: entry.citations,
+        recommendation: entry.recKey ? MOCK_FALLBACK_RECS[entry.recKey] : undefined,
+      };
+    }
   }
   return {
     answer:
@@ -106,6 +159,7 @@ function mockAnswer(query: string): { answer: string; citations: Citation[] } {
 export interface StreamCallbacks {
   onToken: (delta: string) => void;
   onCitations: (citations: Citation[]) => void;
+  onRecommendations?: (recommendations: Recommendation) => void;
   onDone: (meta: { mock: boolean; cached: boolean; ok: boolean; error?: string }) => void;
 }
 
@@ -118,13 +172,14 @@ export async function streamAskAssistant(
 
   // Mock fallback — no API URL configured.
   if (isMockMode) {
-    const { answer, citations } = mockAnswer(query);
+    const { answer, citations, recommendation } = mockAnswer(query);
     const chunks = answer.match(/[\s\S]{1,24}/g) ?? [answer];
     for (const chunk of chunks) {
       callbacks.onToken(chunk);
       await new Promise((r) => setTimeout(r, 20));
     }
     callbacks.onCitations(citations);
+    if (recommendation && callbacks.onRecommendations) callbacks.onRecommendations(recommendation);
     callbacks.onDone({ mock: true, cached: false, ok: true });
     return;
   }
@@ -174,6 +229,9 @@ export async function streamAskAssistant(
         } else if (eventName === "citations") {
           const c = (data as { citations?: Citation[] }).citations;
           if (c) callbacks.onCitations(c);
+        } else if (eventName === "recommendations") {
+          const r = (data as { recommendations?: Recommendation }).recommendations;
+          if (r && callbacks.onRecommendations) callbacks.onRecommendations(r);
         } else if (eventName === "done") {
           callbacks.onDone(data as { mock: boolean; cached: boolean; ok: boolean });
           return;
@@ -184,13 +242,14 @@ export async function streamAskAssistant(
     callbacks.onDone({ mock: false, cached: false, ok: true });
   } catch (err) {
     // Network or CORS error → fall back to mock inline so the UI never hangs.
-    const { answer, citations } = mockAnswer(query);
+    const { answer, citations, recommendation } = mockAnswer(query);
     const chunks = answer.match(/[\s\S]{1,24}/g) ?? [answer];
     for (const chunk of chunks) {
       callbacks.onToken(chunk);
       await new Promise((r) => setTimeout(r, 15));
     }
     callbacks.onCitations(citations);
+    if (recommendation && callbacks.onRecommendations) callbacks.onRecommendations(recommendation);
     callbacks.onDone({
       mock: true,
       cached: false,

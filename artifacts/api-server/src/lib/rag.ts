@@ -168,6 +168,22 @@ function citationsFromRetrieval(r: RetrievalResult): Citation[] {
   }));
 }
 
+/**
+ * Extract recommendations from top hit(s) — sólo si el entry tiene
+ * `recommendations` structured field. Usado como "tool use lite" en modo
+ * mock (las recomendaciones están hardcoded en el corpus) o como fallback
+ * si el LLM real no devolvió structured output.
+ */
+function recommendationFromRetrieval(r: RetrievalResult) {
+  const top = r.hits[0]?.entry;
+  if (!top?.recommendations) return null;
+  return {
+    ...top.recommendations,
+    source_id: top.id,
+    source_name: top.source_name,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Public: stream answer
 // ---------------------------------------------------------------------------
@@ -231,6 +247,8 @@ export async function streamAnswer(
       await new Promise((r) => setTimeout(r, 20));
     }
     sseSend(res, "citations", { citations });
+    const rec = recommendationFromRetrieval(retrieval);
+    if (rec) sseSend(res, "recommendations", { recommendations: rec });
     sseSend(res, "done", {
       ok: true,
       mock: true,
@@ -262,6 +280,9 @@ export async function streamAnswer(
       if (delta) sseSend(res, "token", { delta });
     }
     sseSend(res, "citations", { citations });
+    // Real mode también emite recommendations si el top hit las tiene pre-cargadas
+    const rec = recommendationFromRetrieval(retrieval);
+    if (rec) sseSend(res, "recommendations", { recommendations: rec });
     sseSend(res, "done", { ok: true, mock: false, cached: false });
     res.end();
   } catch (err) {

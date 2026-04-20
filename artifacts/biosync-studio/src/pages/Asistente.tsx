@@ -1,12 +1,16 @@
 import { useState, useRef, useEffect } from "react";
-import { streamAskAssistant, type Citation } from "../lib/api";
+import { useLocation } from "wouter";
+import { streamAskAssistant, type Citation, type Recommendation } from "../lib/api";
+import CitationGraph from "../components/CitationGraph";
 
 interface Message {
   role: "user" | "bot";
   text: string;
   time: string;
   citations?: Citation[];
+  recommendations?: Recommendation;
   meta?: { mock: boolean; cached: boolean };
+  query?: string;
 }
 
 function getTime() {
@@ -40,10 +44,25 @@ export default function Asistente() {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [, navigate] = useLocation();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Auto-submit query from ?q=... (usado por Command Palette "Preguntarle al Asistente")
+  useEffect(() => {
+    const qs = new URLSearchParams(window.location.search);
+    const q = qs.get("q");
+    if (!q || !q.trim()) return;
+    setInput(q);
+    const t = setTimeout(() => {
+      void handleSend(q);
+      window.history.replaceState({}, "", window.location.pathname);
+    }, 100);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSend = async (text: string) => {
     if (!text.trim() || loading) return;
@@ -53,7 +72,7 @@ export default function Asistente() {
     setMessages((prev) => [
       ...prev,
       userMsg,
-      { role: "bot", text: "", time: getTime() },
+      { role: "bot", text: "", time: getTime(), query: q },
     ]);
     setInput("");
     setLoading(true);
@@ -79,6 +98,15 @@ export default function Asistente() {
             const next = [...prev];
             if (next[botIndex]) {
               next[botIndex] = { ...next[botIndex], citations: c };
+            }
+            return next;
+          });
+        },
+        onRecommendations: (r) => {
+          setMessages((prev) => {
+            const next = [...prev];
+            if (next[botIndex]) {
+              next[botIndex] = { ...next[botIndex], recommendations: r };
             }
             return next;
           });
@@ -207,9 +235,111 @@ export default function Asistente() {
                 {msg.text || (msg.role === "bot" && loading && i === messages.length - 1 ? "…" : msg.text)}
               </div>
 
+              {/* Recommendations chips (tool-use style) */}
+              {msg.role === "bot" && msg.recommendations && (
+                <div
+                  className="mt-3 rounded-xl overflow-hidden"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, rgba(167, 139, 250, 0.08), rgba(0, 229, 204, 0.05))",
+                    border: "1px solid rgba(167, 139, 250, 0.3)",
+                  }}
+                >
+                  <div
+                    className="flex items-center gap-2 px-3 py-2 border-b"
+                    style={{ borderColor: "rgba(167, 139, 250, 0.2)" }}
+                  >
+                    <span style={{ fontSize: 14 }}>⚡</span>
+                    <p className="text-xs font-semibold flex-1" style={{ color: "var(--bs-ml)" }}>
+                      {msg.recommendations.title}
+                    </p>
+                    <span
+                      className="bs-mono text-[10px] px-1.5 py-0.5 rounded"
+                      style={{
+                        background: "rgba(167, 139, 250, 0.15)",
+                        color: "var(--bs-ml)",
+                      }}
+                    >
+                      confianza {(msg.recommendations.confidence * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                  {msg.recommendations.setpoints && (
+                    <div className="flex flex-wrap gap-2 px-3 py-2">
+                      {Object.entries(msg.recommendations.setpoints).map(([key, val]) => (
+                        <span
+                          key={key}
+                          className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs bs-mono"
+                          style={{
+                            background: "rgba(167, 139, 250, 0.1)",
+                            color: "var(--bs-text-primary)",
+                            border: "1px solid rgba(167, 139, 250, 0.25)",
+                          }}
+                        >
+                          <span style={{ color: "var(--bs-text-muted)" }}>{key}</span>
+                          <span className="font-bold" style={{ color: "var(--bs-ml)" }}>
+                            {val}
+                          </span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {msg.recommendations.actions &&
+                    msg.recommendations.actions.length > 0 && (
+                      <ul className="px-3 pb-2 space-y-1">
+                        {msg.recommendations.actions.map((a, ai) => (
+                          <li
+                            key={ai}
+                            className="text-xs flex items-start gap-2"
+                            style={{ color: "var(--bs-text-secondary)" }}
+                          >
+                            <span style={{ color: "var(--bs-ml)" }}>•</span>
+                            <span>{a}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  <div className="flex gap-2 px-3 pb-3 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const r = msg.recommendations!;
+                        const params = new URLSearchParams();
+                        if (r.preset_id) params.set("preset", r.preset_id);
+                        if (r.setpoints?.ph) params.set("ph", String(r.setpoints.ph));
+                        if (r.setpoints?.temp) params.set("temp", String(r.setpoints.temp));
+                        if (r.setpoints?.do) params.set("do", String(r.setpoints.do));
+                        if (r.setpoints?.rpm) params.set("rpm", String(r.setpoints.rpm));
+                        navigate(`/dashboard?${params.toString()}`);
+                      }}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:scale-105"
+                      style={{
+                        background: "var(--bs-accent)",
+                        color: "var(--bs-bg-1)",
+                        boxShadow: "0 0 16px rgba(0, 229, 204, 0.3)",
+                      }}
+                    >
+                      ⚡ Aplicar al Dashboard
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate("/simulador")}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-white/5"
+                      style={{
+                        color: "var(--bs-text-secondary)",
+                        border: "1px solid var(--bs-border-default)",
+                      }}
+                    >
+                      📊 Ver simulación
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Citations */}
               {msg.role === "bot" && msg.citations && msg.citations.length > 0 && (
                 <div className="mt-2 space-y-2">
+                  {/* Citation graph */}
+                  <CitationGraph citations={msg.citations} query={msg.query} />
                   <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
                     Fuentes ({msg.citations.length}) · cada una abrís en nueva pestaña:
                   </p>

@@ -1,8 +1,9 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import PainPointsWidget from "../components/PainPointsWidget";
 import KpiCard from "../components/KpiCard";
 import PasteCSVBanner from "../components/PasteCSVBanner";
 import { usePasteCSV } from "../hooks/usePasteCSV";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   LineChart,
   Line,
@@ -190,6 +191,102 @@ const modelDetails = [
   { label: "Fuentes", value: "Pfizer MI Edge (AWS), Algocell, bioRxiv 2024, Biotechnology & Bioengineering" },
 ];
 
+interface AppliedPreset {
+  preset?: string;
+  ph?: number;
+  temp?: number;
+  do?: number;
+  rpm?: number;
+}
+
+function PresetAppliedBanner() {
+  const [preset, setPreset] = useState<AppliedPreset | null>(null);
+
+  useEffect(() => {
+    const qs = new URLSearchParams(window.location.search);
+    const raw: AppliedPreset = {
+      preset: qs.get("preset") ?? undefined,
+      ph: qs.has("ph") ? Number(qs.get("ph")) : undefined,
+      temp: qs.has("temp") ? Number(qs.get("temp")) : undefined,
+      do: qs.has("do") ? Number(qs.get("do")) : undefined,
+      rpm: qs.has("rpm") ? Number(qs.get("rpm")) : undefined,
+    };
+    const hasAny =
+      raw.preset || raw.ph !== undefined || raw.temp !== undefined || raw.do !== undefined || raw.rpm !== undefined;
+    if (!hasAny) return;
+    setPreset(raw);
+    window.history.replaceState({}, "", window.location.pathname);
+    const timer = setTimeout(() => setPreset(null), 12_000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <AnimatePresence>
+      {preset && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.32 }}
+          className="px-4 lg:px-8 mb-4"
+        >
+          <div
+            className="rounded-xl px-4 py-3 flex items-center gap-3"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(167, 139, 250, 0.12), rgba(0, 229, 204, 0.08))",
+              border: "1px solid rgba(167, 139, 250, 0.4)",
+              boxShadow: "0 0 24px rgba(167, 139, 250, 0.2)",
+            }}
+          >
+            <span style={{ fontSize: 18 }}>⚡</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold" style={{ color: "var(--bs-ml)" }}>
+                Preset del Asistente aplicado
+                {preset.preset && (
+                  <span className="ml-2 bs-mono text-[11px]" style={{ color: "var(--bs-text-muted)" }}>
+                    · {preset.preset}
+                  </span>
+                )}
+              </p>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {preset.ph !== undefined && (
+                  <span className="bs-mono text-[11px]" style={{ color: "var(--bs-text-secondary)" }}>
+                    pH <strong style={{ color: "var(--bs-accent)" }}>{preset.ph}</strong>
+                  </span>
+                )}
+                {preset.temp !== undefined && (
+                  <span className="bs-mono text-[11px]" style={{ color: "var(--bs-text-secondary)" }}>
+                    · Temp <strong style={{ color: "var(--bs-accent)" }}>{preset.temp}°C</strong>
+                  </span>
+                )}
+                {preset.do !== undefined && (
+                  <span className="bs-mono text-[11px]" style={{ color: "var(--bs-text-secondary)" }}>
+                    · DO <strong style={{ color: "var(--bs-accent)" }}>{preset.do}%</strong>
+                  </span>
+                )}
+                {preset.rpm !== undefined && (
+                  <span className="bs-mono text-[11px]" style={{ color: "var(--bs-text-secondary)" }}>
+                    · RPM <strong style={{ color: "var(--bs-accent)" }}>{preset.rpm}</strong>
+                  </span>
+                )}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setPreset(null)}
+              className="text-xs px-2 py-1 rounded hover:bg-white/5 transition-colors flex-shrink-0"
+              style={{ color: "var(--bs-text-muted)" }}
+            >
+              ✕
+            </button>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 function PasteCSVResults() {
   const { status, analysis, cached, rowsCount, reset } = usePasteCSV();
   return (
@@ -306,6 +403,9 @@ export default function Dashboard() {
           </p>
         </div>
       </div>
+
+      {/* PRESET APPLIED BANNER — triggered by Asistente "Aplicar" chip */}
+      <PresetAppliedBanner />
 
       {/* PASTE CSV BANNER (magic moment #1) */}
       <PasteCSVResults />
