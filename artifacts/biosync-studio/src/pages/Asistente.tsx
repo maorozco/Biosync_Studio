@@ -1,141 +1,25 @@
 import { useState, useRef, useEffect } from "react";
+import { streamAskAssistant, type Citation } from "../lib/api";
 
 interface Message {
   role: "user" | "bot";
   text: string;
   time: string;
+  citations?: Citation[];
+  meta?: { mock: boolean; cached: boolean };
 }
 
 function getTime() {
   return new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
 }
 
-function getResponse(input: string): string {
-  const q = input.toLowerCase();
-
-  if (q.includes("hola") || q.includes("ayuda") || q.includes("buenos") || q.includes("buenas")) {
-    return `¡Hola! 👋 Soy el asistente de BioSync Studio. Puedo ayudarte con:
-
-🧪 Optimización de bioprocesos
-📊 Interpretación de datos de biorreactor
-📏 Problemas de scale-up
-🔧 Selección de equipos y sensores
-🌐 Búsqueda de protocolos en la Red de Bio-Conocimiento
-
-¿En qué estás trabajando?`;
-  }
-
-  if (q.includes("ph") || q.includes("óptimo") || q.includes("optimo")) {
-    return `🧪 Los rangos de pH óptimos por organismo son:
-
-- E. coli: 6.8–7.4 (óptimo 7.2)
-- B. subtilis: 6.5–7.5 (óptimo 7.0)
-- S. cerevisiae: 4.5–6.0 (óptimo 5.5)
-- L. plantarum: 5.5–6.5 (óptimo 6.0)
-
-Para producción de Vitamina B12 con E. coli K-12: pH 7.2 es el setpoint ideal.
-
-📖 Fuente: Biotechnology & Bioengineering, 2025`;
-  }
-
-  if (q.includes("rendimiento") || q.includes("bajó") || q.includes("bajo") || q.includes("problema") || q.includes("fallo") || q.includes("cayó")) {
-    return `🔍 Las causas más comunes de caída de rendimiento son:
-
-1. pH fuera de rango (verificar electrodo)
-2. Agotamiento de sustrato (medir glucosa residual)
-3. Acumulación de subproductos tóxicos (acetato en E. coli si glucosa >10 g/L)
-4. Contaminación (verificar pureza del inóculo)
-5. Transferencia de oxígeno insuficiente (aumentar agitación o flujo de aire)
-
-¿En qué organismo y producto estás trabajando? Te puedo dar recomendaciones más específicas.`;
-  }
-
-  if (q.includes("escal") || q.includes("scale") || q.includes("1l") || q.includes("50l") || q.includes("volumen")) {
-    return `📏 Los factores críticos de scale-up son:
-
-1. kLa (transferencia de oxígeno): mantener constante
-2. Tiempo de mezcla: aumenta con el volumen — verificar homogeneidad
-3. Relación superficie/volumen: cambia la disipación de calor
-4. Gradientes: en >50 L pueden existir gradientes locales de pH y DO
-
-Regla práctica: mantener P/V (potencia por volumen) constante y verificar el kLa antes de scale-out.
-
-📖 Fuente: Proyecto BALANCE (Canadá-UK, $2M, 2025)`;
-  }
-
-  if (q.includes("costo") || q.includes("precio") || q.includes("cuánto") || q.includes("cuanto") || q.includes("dinero")) {
-    return `💰 Costos estimados de producción por corrida:
-
-- Matraz 250 mL: $5–15 USD (reactivos básicos)
-- Biorreactor 1 L: $50–150 USD
-- Biorreactor 5 L: $200–500 USD
-- Biorreactor 50 L: $1,000–3,000 USD
-- Biorreactor 100–500 L: $3,000–8,000 USD
-
-BioSync Studio reduce estos costos ~10x al simular antes de ejecutar y optimizar condiciones con IA.
-
-Biorreactor usado funcional (5 L): desde $5,000 USD en mercado secundario (eBay, Labx, BioSurplus, Bioreactor3000)`;
-  }
-
-  if (q.includes("sensor") || q.includes("hardware") || q.includes("equipo") || q.includes("instrumento")) {
-    return `📡 Sensores básicos para monitoreo de biorreactor:
-
-- pH: Hamilton EasyFerm Plus (~$300–500)
-- Oxígeno disuelto: Hamilton VisiFerm DO (~$400–700)
-- Temperatura: PT100 estándar (~$50–150)
-- Biomasa en línea: Aber Futura (capacitancia, ~$2,000+)
-- Glucosa inline: Raman spectroscopy (~$80,000+)
-
-Set mínimo viable (pH + DO + temp): ~$800–1,300 USD
-BioSync Studio es compatible con cualquier sensor con salida digital o analógica.`;
-  }
-
-  if (q.includes("biosync") || q.includes("funciona") || q.includes("qué es") || q.includes("que es") || q.includes("plataforma")) {
-    return `🔬 BioSync Studio es una plataforma de IA para optimización de bioprocesos:
-
-1. 📊 Dashboard: Monitoreo en tiempo real con alertas predictivas
-2. 🌐 Red de Bio-Conocimiento: Protocolos optimizados compartidos por labs del mundo (aprendizaje federado)
-3. 🧪 Simulador Gemelo Digital: Predice el resultado ANTES de ejecutar el cultivo
-4. 🤖 IA Predictiva: Recomienda setpoints óptimos y detecta problemas antes de que ocurran
-
-Precio: desde $99/mes (Starter) hasta $499/mes (Enterprise)
-Competencia más cercana: Siemens ($500K+), Algocell ($50K+/año) — BioSync es 500x más barato.`;
-  }
-
-  if (q.includes("b12") || q.includes("vitamina") || q.includes("riboflavina") || q.includes("cobalamina")) {
-    return `💊 Producción de Vitamina B12 (cobalamina):
-
-Organismo recomendado: E. coli K-12 o Propionibacterium freudenreichii
-
-Condiciones óptimas:
-- Temperatura: 37°C (E. coli) / 30°C (Propionibacterium)
-- pH: 7.0–7.2
-- DO: 30–40%
-- Medio: LB + cobalto (CoCl₂) 10–50 µM (¡esencial!)
-- Tiempo: 48–72 horas
-
-Rendimiento típico: 50–150 mg/L en E. coli (sin optimización)
-Con BioSync: hasta 145 mg/L (percentil 95 de la Red)
-
-📖 Fuente: Biotechnology & Bioengineering 2024, Nature Biotechnology 2023`;
-  }
-
-  return `Gracias por tu pregunta. Te recomiendo explorar:
-
-- 📊 Dashboard para ver el estado en tiempo real de tu biorreactor
-- 🧪 Simulador para probar tu bioproceso virtualmente
-- 🌐 Red de Bio-Conocimiento para protocolos optimizados
-
-¿Quieres que te ayude con algo específico sobre tu cultivo o bioproceso?`;
-}
-
 const suggestions = [
-  "¿Cuál es el pH óptimo para B12 con E. coli?",
-  "Mi rendimiento bajó, ¿qué puede estar pasando?",
-  "¿Cómo escalo de 1L a 50L?",
-  "¿Cuánto cuesta producir riboflavina?",
-  "¿Qué sensores necesito?",
-  "¿Cómo funciona BioSync Studio?",
+  "Perdí pH en mi reactor a las 3am, ¿qué hago?",
+  "DO crash en mi biorreactor — pasos",
+  "¿Cómo escalo de 5L a 50L?",
+  "¿Cuánto cuesta Benchling?",
+  "¿Qué dice el Annex 22 hoy?",
+  "¿Qué alternativa hay a OFAT?",
 ];
 
 const initialMessages: Message[] = [
@@ -143,9 +27,9 @@ const initialMessages: Message[] = [
     role: "bot",
     text: `¡Bienvenido al Asistente BioSync! 👋
 
-Soy tu experto en bioprocesos disponible 24/7. Puedo ayudarte con optimización de cultivos, interpretación de datos, scale-up, costos, equipos y mucho más.
+Respondo con retrieval + grounding sobre un corpus curado de quejas reales de ingenieros (Reddit, BioProcess Intl, LinkedIn) + papers clave. **No invento citas** — cada respuesta trae fuentes verificables.
 
-Escribe tu pregunta o selecciona una de las opciones rápidas abajo.`,
+Escribe tu pregunta o seleccioná una rápida abajo.`,
     time: getTime(),
   },
 ];
@@ -163,16 +47,61 @@ export default function Asistente() {
 
   const handleSend = async (text: string) => {
     if (!text.trim() || loading) return;
-    const userMsg: Message = { role: "user", text: text.trim(), time: getTime() };
-    setMessages((prev) => [...prev, userMsg]);
+    const q = text.trim();
+    const userMsg: Message = { role: "user", text: q, time: getTime() };
+    const botIndex = messages.length + 1; // index of the bot placeholder we'll append
+    setMessages((prev) => [
+      ...prev,
+      userMsg,
+      { role: "bot", text: "", time: getTime() },
+    ]);
     setInput("");
     setLoading(true);
 
-    await new Promise((r) => setTimeout(r, 600 + Math.random() * 800));
-    const botMsg: Message = { role: "bot", text: getResponse(text), time: getTime() };
-    setMessages((prev) => [...prev, botMsg]);
-    setLoading(false);
-    inputRef.current?.focus();
+    let accumulated = "";
+    let citations: Citation[] = [];
+
+    try {
+      await streamAskAssistant(q, {
+        onToken: (delta) => {
+          accumulated += delta;
+          setMessages((prev) => {
+            const next = [...prev];
+            if (next[botIndex]) {
+              next[botIndex] = { ...next[botIndex], text: accumulated };
+            }
+            return next;
+          });
+        },
+        onCitations: (c) => {
+          citations = c;
+          setMessages((prev) => {
+            const next = [...prev];
+            if (next[botIndex]) {
+              next[botIndex] = { ...next[botIndex], citations: c };
+            }
+            return next;
+          });
+        },
+        onDone: (meta) => {
+          setMessages((prev) => {
+            const next = [...prev];
+            if (next[botIndex]) {
+              next[botIndex] = {
+                ...next[botIndex],
+                meta: { mock: meta.mock, cached: meta.cached },
+              };
+            }
+            return next;
+          });
+        },
+      });
+    } finally {
+      setLoading(false);
+      // reference citations so TS doesn't complain in case future wiring needs them
+      void citations;
+      inputRef.current?.focus();
+    }
   };
 
   const handleKey = (e: React.KeyboardEvent) => {
@@ -183,12 +112,18 @@ export default function Asistente() {
   };
 
   return (
-    <div className="page-enter flex flex-col" style={{ background: "#06191A", height: "calc(100vh - 56px)" }}>
+    <div
+      className="page-enter flex flex-col"
+      style={{ background: "#06191A", height: "calc(100vh - 56px)" }}
+    >
       {/* Header */}
       <div className="px-4 lg:px-8 pt-5 pb-4 flex-shrink-0">
-        <h1 className="text-xl font-bold text-white mb-1">💬 Asistente BioSync — Tu experto en bioprocesos 24/7</h1>
+        <h1 className="text-xl font-bold text-white mb-1">
+          💬 Asistente BioSync — RAG con citas verificables
+        </h1>
         <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
-          Respuestas basadas en literatura científica y datos de la Red de Bio-Conocimiento
+          Retrieval + grounding sobre corpus curado. Cada respuesta cita fuentes
+          reales (Reddit, BioProcess Intl, papers). Sin alucinaciones.
         </p>
       </div>
 
@@ -199,7 +134,8 @@ export default function Asistente() {
             <button
               key={s}
               onClick={() => handleSend(s)}
-              className="px-3 py-1.5 rounded-full text-xs font-medium transition-all hover:scale-105"
+              disabled={loading}
+              className="px-3 py-1.5 rounded-full text-xs font-medium transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 background: "rgba(0,229,204,0.08)",
                 color: "rgba(255,255,255,0.7)",
@@ -215,7 +151,10 @@ export default function Asistente() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 lg:px-8 py-2 space-y-4">
         {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+          <div
+            key={i}
+            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+          >
             <div className={`max-w-[85%] ${msg.role === "user" ? "order-2" : ""}`}>
               {msg.role === "bot" && (
                 <div className="flex items-center gap-2 mb-1">
@@ -225,7 +164,26 @@ export default function Asistente() {
                   >
                     🔬
                   </div>
-                  <span className="text-xs text-white/40">BioSync · {msg.time}</span>
+                  <span className="text-xs text-white/40">
+                    BioSync · {msg.time}
+                    {msg.meta?.mock && (
+                      <span
+                        className="ml-2 px-1.5 py-0.5 rounded"
+                        style={{
+                          background: "rgba(255,200,87,0.15)",
+                          color: "#ffc857",
+                          fontSize: "10px",
+                        }}
+                        title={
+                          msg.meta.cached
+                            ? "Respuesta pre-validada (cache)"
+                            : "Corriendo en modo mock (sin LLM externo)"
+                        }
+                      >
+                        {msg.meta.cached ? "pre-validada" : "mock"}
+                      </span>
+                    )}
+                  </span>
                 </div>
               )}
               <div
@@ -246,19 +204,64 @@ export default function Asistente() {
                       }
                 }
               >
-                {msg.text}
+                {msg.text || (msg.role === "bot" && loading && i === messages.length - 1 ? "…" : msg.text)}
               </div>
+
+              {/* Citations */}
+              {msg.role === "bot" && msg.citations && msg.citations.length > 0 && (
+                <div className="mt-2 space-y-2">
+                  <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+                    Fuentes ({msg.citations.length}) · cada una abrís en nueva pestaña:
+                  </p>
+                  {msg.citations.map((c, ci) => (
+                    <a
+                      key={c.id + ci}
+                      href={c.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block rounded-lg px-3 py-2 text-xs transition-colors hover:bg-white/5"
+                      style={{
+                        background: "rgba(0,229,204,0.05)",
+                        border: "1px solid rgba(0,229,204,0.12)",
+                      }}
+                    >
+                      <div
+                        className="font-semibold mb-1"
+                        style={{ color: "#00E5CC" }}
+                      >
+                        [{ci + 1}] {c.source_name}
+                        <span
+                          className="ml-2 font-mono"
+                          style={{ color: "rgba(255,255,255,0.3)" }}
+                        >
+                          sim: {c.similarity.toFixed(2)}
+                        </span>
+                      </div>
+                      <p
+                        className="leading-relaxed"
+                        style={{ color: "rgba(255,255,255,0.6)" }}
+                      >
+                        "{c.text}"
+                      </p>
+                    </a>
+                  ))}
+                </div>
+              )}
+
               {msg.role === "user" && (
                 <p className="text-xs text-white/30 text-right mt-1">{msg.time}</p>
               )}
             </div>
           </div>
         ))}
-        {loading && (
+        {loading && messages[messages.length - 1]?.text === "" && (
           <div className="flex justify-start">
             <div
               className="rounded-xl px-4 py-3 flex items-center gap-2"
-              style={{ background: "rgba(10,46,46,0.85)", border: "1px solid rgba(0,229,204,0.15)" }}
+              style={{
+                background: "rgba(10,46,46,0.85)",
+                border: "1px solid rgba(0,229,204,0.15)",
+              }}
             >
               {[0, 1, 2].map((i) => (
                 <div
@@ -279,7 +282,10 @@ export default function Asistente() {
       {/* Input */}
       <div
         className="flex-shrink-0 px-4 lg:px-8 py-4 border-t"
-        style={{ borderColor: "rgba(0,229,204,0.1)", background: "rgba(10,46,46,0.5)" }}
+        style={{
+          borderColor: "rgba(0,229,204,0.1)",
+          background: "rgba(10,46,46,0.5)",
+        }}
       >
         <div className="flex gap-3 max-w-4xl mx-auto">
           <input
@@ -288,7 +294,7 @@ export default function Asistente() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKey}
-            placeholder="Escribe tu pregunta sobre bioprocesos..."
+            placeholder="Escribe tu pregunta sobre bioprocesos…"
             disabled={loading}
             className="flex-1 rounded-xl px-4 py-3 text-sm outline-none"
             style={{
@@ -307,7 +313,7 @@ export default function Asistente() {
               cursor: loading || !input.trim() ? "not-allowed" : "pointer",
             }}
           >
-            Enviar
+            {loading ? "…" : "Enviar"}
           </button>
         </div>
       </div>

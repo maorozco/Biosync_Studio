@@ -71,6 +71,16 @@ pnpm --filter @workspace/landing build
 pnpm --filter @workspace/landing typecheck
 pnpm --filter @workspace/landing test:e2e  # Playwright E2E (ES+EN full signup → green tier)
 
+# API-server (Express 5 + Drizzle + RAG). MOCK MODE si no hay DB/LLM keys.
+pnpm --filter @workspace/api-server build
+PORT=3002 pnpm --filter @workspace/api-server start
+
+# Biosync-studio conectado al api-server local (Asistente RAG real + widget pain-points)
+PORT=3000 BASE_PATH=/ VITE_API_URL=http://localhost:3002 pnpm --filter @workspace/biosync-studio dev
+
+# Scrape manual Reddit (requiere APIFY_API_KEY)
+APIFY_API_KEY=... pnpm --filter @workspace/scripts exec tsx src/scrape-reddit.ts --limit=50
+
 # Typecheck todo
 pnpm typecheck
 
@@ -119,6 +129,23 @@ Material operacional en `marketing/pitch-*`:
 **Stones-in-shoes audit aplicado** a `landing/src/messages.ts`, `ADS-HOOKS.md`, `AI-ML-MOAT.md`: hedging en claims de `<60 min deriva` (caveat "sensores en tiempo real"), `Annex 22-ready` (draft jul 2025, regla final Q2 2026, NO "prohíbe mid-2026"), `<50 batches` (reformulado a "≥20 etiquetados + Bayesian opt debajo"), `playas in-situ` (reformulado a "biorreactores distribuidos + in-situ hidrocarburos").
 
 Regla de voz Manu: humano · storytelling · genuino · transparente · conviction ("te prometo" · "tengo la seguridad"). Si una frase suena a VC deck, se reescribe. Ver `~/.claude/projects/.../memory/pitch_style_manu.md`.
+
+## Backend + RAG (dual mode: mock local / real con credenciales)
+
+Código completo del prototipo listo para flipear a producción cuando haya `az login`. Detalles en `DEPLOY.md`.
+
+- **`artifacts/api-server/`** — Express 5 + Drizzle + OpenAI SDK (soporta OpenAI direct O Azure OpenAI). 4 endpoints operativos:
+  - `POST /api/asistente/ask` — RAG con streaming SSE. Mock mode = keyword-jaccard sobre corpus offline (22 entries en `src/data/pain-corpus.json`) + cache de 10 respuestas pre-validadas. Real mode = embeddings + cosine + chat completion.
+  - `GET /api/asistente/status` — `{mock, llm, corpus_size}` para introspección.
+  - `POST /api/waitlist` + `GET /api/waitlist/count` — signup landing + counter. Mock mode = in-memory; Real mode = Postgres.
+  - `POST /api/waitlist-responses` — form 6-preguntas + scoring server-side (`src/lib/scoring.ts` misma rubrica que landing).
+  - `GET /api/insights/pain-points?window=7d` — top 5 categorías desde `reddit_posts`, fallback mock si no hay DB.
+- **`lib/db/src/schema/index.ts`** — 5 tablas Drizzle: `waitlist`, `waitlist_responses`, `reddit_posts`, `embeddings` (pgvector 1536), `pain_clusters`. `getDb()` es lazy — solo lanza error si se llama sin `DATABASE_URL`.
+- **`artifacts/biosync-studio/src/lib/api.ts`** — cliente SSE con mock fallback offline. El Asistente renderiza tokens en vivo + citation cards con URL real.
+- **`artifacts/biosync-studio/src/components/PainPointsWidget.tsx`** — widget Dashboard que consume `/api/insights/pain-points`.
+- **`scripts/src/scrape-reddit.ts`** — Apify CLI standalone (`practicaltools/apify-reddit-api`, $2/1K posts).
+
+**Principio:** nada se bloquea por falta de credenciales. Correr `pnpm --filter @workspace/api-server start` con `.env` vacío → mock mode. Pegar API key → real mode. Zero code change. Ver `DEPLOY.md` para flip production.
 
 ## Marketing & Discovery (launch 2026-04-22)
 

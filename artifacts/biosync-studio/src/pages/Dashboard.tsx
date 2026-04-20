@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import PainPointsWidget from "../components/PainPointsWidget";
 import {
   LineChart,
   Line,
@@ -214,6 +215,11 @@ export default function Dashboard() {
         <p className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
           Datos simulados de un cultivo de E. coli para producción de Vitamina B12
         </p>
+      </div>
+
+      {/* PAIN POINTS WIDGET — data del API (mock si VITE_API_URL vacío) */}
+      <div className="px-4 lg:px-8">
+        <PainPointsWidget />
       </div>
 
       {/* TOP METRICS */}

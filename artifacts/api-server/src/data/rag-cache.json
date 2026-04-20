@@ -1,0 +1,102 @@
+{
+  "entries": [
+    {
+      "query": "perdí ph en mi reactor a las tres de la mañana",
+      "corpus_id": "q-ph-drift-3am",
+      "alias_queries": [
+        "ph se cayó a las 3am",
+        "ph crash en el biorreactor durante la noche",
+        "perdí pH nocturno",
+        "mi reactor bajó pH sin avisar"
+      ]
+    },
+    {
+      "query": "do crash en mi reactor",
+      "corpus_id": "q-do-crash",
+      "alias_queries": [
+        "DO crash",
+        "oxígeno disuelto se cayó",
+        "dissolved oxygen crash",
+        "el DO del reactor bajó de golpe"
+      ]
+    },
+    {
+      "query": "como escalo de 5L a 50L",
+      "corpus_id": "q-scale-up-5l-50l",
+      "alias_queries": [
+        "scale-up 5L a 50L",
+        "scale up del reactor",
+        "cómo paso de 5 litros a 50 litros",
+        "scale-up de fermentación"
+      ]
+    },
+    {
+      "query": "cuanto cuesta un batch contaminado",
+      "corpus_id": "q-contamination-cost",
+      "alias_queries": [
+        "cuánto cuesta una contaminación",
+        "costo de batch fallido por contaminación",
+        "batch perdido por contaminación cuánto me sale"
+      ]
+    },
+    {
+      "query": "cuanto cuesta benchling",
+      "corpus_id": "q-benchling-cost",
+      "alias_queries": [
+        "precio de Benchling",
+        "Benchling vale la pena",
+        "alternativa barata a Benchling",
+        "cost of Benchling"
+      ]
+    },
+    {
+      "query": "que alternativa hay a ofat",
+      "corpus_id": "q-ofat-alternatives",
+      "alias_queries": [
+        "cómo escapar de OFAT",
+        "alternativa a OFAT",
+        "DoE vs OFAT",
+        "cómo optimizar sin cambiar una variable por mes"
+      ]
+    },
+    {
+      "query": "que es annex 22",
+      "corpus_id": "q-annex-22-status",
+      "alias_queries": [
+        "annex 22 EMA",
+        "que dice annex 22",
+        "annex 22 prohibe IA",
+        "status de annex 22"
+      ]
+    },
+    {
+      "query": "fast petase degrada plastico",
+      "corpus_id": "q-fast-petase",
+      "alias_queries": [
+        "FAST-PETase",
+        "enzima que degrada PET",
+        "plástico en el océano bacterias",
+        "cómo se degrada PET"
+      ]
+    },
+    {
+      "query": "biorremediacion hidrocarburos",
+      "corpus_id": "q-hydrocarbons-insitu",
+      "alias_queries": [
+        "petróleo bacterias",
+        "derrame de hidrocarburos bioremediación",
+        "in-situ hydrocarburos"
+      ]
+    },
+    {
+      "query": "cuanto cuesta una corrida",
+      "corpus_id": "q-cost-per-batch",
+      "alias_queries": [
+        "costo de un batch",
+        "cuánto vale correr un biorreactor",
+        "precio por corrida",
+        "cuánto me cuesta producir"
+      ]
+    }
+  ]
+}
