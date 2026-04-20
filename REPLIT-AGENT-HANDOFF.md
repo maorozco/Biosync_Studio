@@ -77,14 +77,14 @@ Si algún test falla, mirá `test-results/` + `playwright-report/` (se abren con
 
 ```bash
 # Terminal 1: dev server
-PORT=3001 pnpm --filter @workspace/landing dev
+PORT=4300 pnpm --filter @workspace/landing dev
 
 # Terminal 2: curl
-curl -I http://localhost:3001/            # 200 (redirect client-side)
-curl -I http://localhost:3001/es          # 200
-curl -I http://localhost:3001/en          # 200
-curl -I http://localhost:3001/es/gracias  # 200
-curl -I http://localhost:3001/en/thank-you # 200
+curl -I http://localhost:4300/            # 200 (redirect client-side)
+curl -I http://localhost:4300/es          # 200
+curl -I http://localhost:4300/en          # 200
+curl -I http://localhost:4300/es/gracias  # 200
+curl -I http://localhost:4300/en/thank-you # 200
 ```
 
 En el browser verificá el **flow completo**:
@@ -106,7 +106,7 @@ pnpm --filter @workspace/landing build
 # dist/ ~260KB JS + 18KB CSS. Gzip: ~87KB total.
 
 pnpm --filter @workspace/landing preview
-# http://localhost:3001 sirve dist/ como estático
+# http://localhost:4300 sirve dist/ como estático
 ```
 
 ---

@@ -17,8 +17,8 @@ Part of the `Biosync_Studio` pnpm monorepo.
 ```bash
 # From repo root
 pnpm install
-PORT=3001 pnpm --filter @workspace/landing dev
-# open http://localhost:3001 — redirects to /es by default
+PORT=4300 pnpm --filter @workspace/landing dev
+# open http://localhost:4300 — redirects to /es by default
 ```
 
 Build for production:

@@ -55,28 +55,38 @@ Biosync_Studio/
 
 ## Comandos
 
+### Puertos locales BioSync — bloque 43xx
+
+Para no colisionar con otras apps (Next.js 3000 · Streamlit 5000 · Replit 8080-8082), BioSync usa el bloque **43xx**:
+
+| Servicio | Puerto dev | Playwright E2E |
+|---|---|---|
+| Landing (Vite SPA) | **4300** | 4174 |
+| biosync-studio (Vite SPA) | **4310** | 4173 |
+| api-server (Express 5) | **4320** | — |
+
 ```bash
 # Instalar
 pnpm install
 
-# Frontend dev (requiere PORT + BASE_PATH env vars)
-PORT=3000 BASE_PATH=/ pnpm --filter @workspace/biosync-studio dev
+# Frontend biosync-studio dev (requiere PORT + BASE_PATH env vars)
+PORT=4310 BASE_PATH=/ pnpm --filter @workspace/biosync-studio dev
 
-# Backend dev
-pnpm --filter @workspace/api-server dev
+# Backend api-server dev (mock mode si .env vacío)
+pnpm --filter @workspace/api-server dev  # PORT=4320 por defecto desde .env.example
 
 # Landing dev (bilingüe ES+EN, mock mode si VITE_API_URL vacío)
-PORT=3001 pnpm --filter @workspace/landing dev
+pnpm --filter @workspace/landing dev  # PORT=4300 por defecto
 pnpm --filter @workspace/landing build
 pnpm --filter @workspace/landing typecheck
 pnpm --filter @workspace/landing test:e2e  # Playwright E2E (ES+EN full signup → green tier)
 
 # API-server (Express 5 + Drizzle + RAG). MOCK MODE si no hay DB/LLM keys.
 pnpm --filter @workspace/api-server build
-PORT=3002 pnpm --filter @workspace/api-server start
+PORT=4320 pnpm --filter @workspace/api-server start
 
 # Biosync-studio conectado al api-server local (Asistente RAG real + widget pain-points)
-PORT=3000 BASE_PATH=/ VITE_API_URL=http://localhost:3002 pnpm --filter @workspace/biosync-studio dev
+PORT=4310 BASE_PATH=/ VITE_API_URL=http://localhost:4320 pnpm --filter @workspace/biosync-studio dev
 
 # Scrape manual Reddit (requiere APIFY_API_KEY)
 APIFY_API_KEY=... pnpm --filter @workspace/scripts exec tsx src/scrape-reddit.ts --limit=50

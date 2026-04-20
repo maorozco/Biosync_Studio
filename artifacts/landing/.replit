@@ -9,9 +9,9 @@ run = ["sh", "-c", "pnpm --filter @workspace/landing preview"]
 build = ["sh", "-c", "pnpm install && pnpm --filter @workspace/landing build"]
 
 [env]
-PORT = "3001"
+PORT = "4300"
 HOST = "0.0.0.0"
 
 [[ports]]
-localPort = 3001
+localPort = 4300
 externalPort = 80

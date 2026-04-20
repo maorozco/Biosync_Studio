@@ -97,7 +97,7 @@ Replit detecta automáticamente el monorepo pnpm. Run `pnpm install` en la shell
 
 | Secret | Valor | ¿Para qué? |
 |---|---|---|
-| `PORT` | `3002` | Puerto del api-server |
+| `PORT` | `4320` | Puerto del api-server (local BioSync block 43xx) |
 | `CORS_ORIGINS` | `https://<landing-replit-url>,https://bio-sync-stu.replit.app` | Allowlist CORS |
 | `VITE_API_URL` | `https://<api-replit-url>` | Landing + studio apuntan al api-server |
 | `VITE_COUNTER_BASELINE` | `25` | Floor del contador de waitlist |
@@ -133,7 +133,7 @@ URL: `biosync-landing.<username>.replit.app` → apuntar dominio `biosync.studio
 
 ```
 Tipo: Static
-Build command: PORT=3000 BASE_PATH=/ pnpm install && pnpm --filter @workspace/biosync-studio build
+Build command: PORT=4310 BASE_PATH=/ pnpm install && pnpm --filter @workspace/biosync-studio build
 Output directory: artifacts/biosync-studio/dist/public
 Env vars:
   VITE_API_URL = https://<api-replit-url>
@@ -147,7 +147,7 @@ URL: `bio-sync-stu.<username>.replit.app` (ya existe, solo actualizar build).
 Tipo: Autoscale
 Build command: pnpm install && pnpm --filter @workspace/api-server build
 Run command: pnpm --filter @workspace/api-server start
-Port: 3002 (matches PORT secret)
+Port: 4320 (matches PORT secret)
 Min instances: 0  # scale-to-zero — sólo gastás cuando hay tráfico
 Max instances: 3  # protección contra runaway cost
 ```
@@ -277,7 +277,7 @@ Si algo falla: `Replit Console → Logs` muestra stderr de los 3 deployments.
 ┌─────────────────────────┬────────────┬────────────┬────────────────┐
 │ Secret                  │ Local      │ Replit Dev │ Replit Prod    │
 ├─────────────────────────┼────────────┼────────────┼────────────────┤
-│ PORT                    │ 3002       │ 3002       │ 3002           │
+│ PORT (api-server)       │ 4320       │ 4320       │ 4320           │
 │ DATABASE_URL            │ (vacío)    │ (vacío)    │ neon://... opt │
 │ OPENAI_API_KEY          │ (vacío)    │ opt        │ sk-... opt     │
 │ CORS_ORIGINS            │ (vacío)    │ replit url │ biosync.studio │
@@ -285,6 +285,17 @@ Si algo falla: `Replit Console → Logs` muestra stderr de los 3 deployments.
 │ VITE_COUNTER_BASELINE   │ 25         │ 25         │ 25             │
 │ APIFY_API_KEY (scripts) │ opt        │ opt        │ opt            │
 └─────────────────────────┴────────────┴────────────┴────────────────┘
+
+Puertos locales BioSync (bloque 43xx — no colisiona con Next.js 3000 /
+Streamlit 5000 / Replit 8080-8082):
+
+┌─────────────────────────┬────────────┬──────────────────┐
+│ Servicio                │ Port dev   │ Playwright E2E   │
+├─────────────────────────┼────────────┼──────────────────┤
+│ Landing (Vite)          │ 4300       │ 4174             │
+│ biosync-studio (Vite)   │ 4310       │ 4173             │
+│ api-server (Express 5)  │ 4320       │ —                │
+└─────────────────────────┴────────────┴──────────────────┘
 ```
 
 ---
