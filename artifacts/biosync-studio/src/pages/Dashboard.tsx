@@ -2,6 +2,8 @@ import { useState, useCallback, useMemo, useEffect } from "react";
 import PainPointsWidget from "../components/PainPointsWidget";
 import KpiCard from "../components/KpiCard";
 import PasteCSVBanner from "../components/PasteCSVBanner";
+import CycleReplay from "../components/CycleReplay";
+import FrozenModeBadge from "../components/FrozenModeBadge";
 import { usePasteCSV } from "../hooks/usePasteCSV";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -190,6 +192,27 @@ const modelDetails = [
   { label: "Frecuencia de predicción", value: "Cada 30 segundos" },
   { label: "Fuentes", value: "Pfizer MI Edge (AWS), Algocell, bioRxiv 2024, Biotechnology & Bioengineering" },
 ];
+
+function ReplayButton() {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:scale-105 flex-shrink-0"
+        style={{
+          background: "rgba(0, 229, 204, 0.1)",
+          color: "var(--bs-accent)",
+          border: "1px solid var(--bs-border-default)",
+        }}
+      >
+        🎬 Replay última corrida
+      </button>
+      <CycleReplay open={open} onClose={() => setOpen(false)} />
+    </>
+  );
+}
 
 interface AppliedPreset {
   preset?: string;
@@ -402,6 +425,12 @@ export default function Dashboard() {
             </span>
           </p>
         </div>
+        <ReplayButton />
+      </div>
+
+      {/* FROZEN MODE BADGE (Annex 22 compliance) */}
+      <div className="px-4 lg:px-8 mb-3">
+        <FrozenModeBadge />
       </div>
 
       {/* PRESET APPLIED BANNER — triggered by Asistente "Aplicar" chip */}

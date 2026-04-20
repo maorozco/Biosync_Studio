@@ -38,13 +38,79 @@ Escribe tu pregunta o seleccioná una rápida abajo.`,
   },
 ];
 
+// --- Web Speech API typings (compat webkit + standard) ---
+interface SpeechRecognitionEventCompat extends Event {
+  results: { [index: number]: { [index: number]: { transcript: string } } };
+}
+interface SpeechRecognitionCompat {
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  start: () => void;
+  stop: () => void;
+  onresult: ((e: SpeechRecognitionEventCompat) => void) | null;
+  onerror: ((e: Event) => void) | null;
+  onend: (() => void) | null;
+}
+type SpeechRecognitionCtor = new () => SpeechRecognitionCompat;
+
+function getSpeechRecognition(): SpeechRecognitionCtor | null {
+  const w = window as unknown as {
+    SpeechRecognition?: SpeechRecognitionCtor;
+    webkitSpeechRecognition?: SpeechRecognitionCtor;
+  };
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+}
+
 export default function Asistente() {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<SpeechRecognitionCompat | null>(null);
   const [, navigate] = useLocation();
+
+  const startListening = () => {
+    const Ctor = getSpeechRecognition();
+    if (!Ctor) {
+      alert("Tu navegador no soporta reconocimiento de voz. Probá Chrome o Edge.");
+      return;
+    }
+    const rec = new Ctor();
+    rec.lang = "es-CO";
+    rec.interimResults = false;
+    rec.continuous = false;
+    rec.onresult = (e) => {
+      const transcript = e.results[0]?.[0]?.transcript;
+      if (transcript) {
+        setInput(transcript);
+        setTimeout(() => void handleSend(transcript), 100);
+      }
+    };
+    rec.onerror = () => setListening(false);
+    rec.onend = () => setListening(false);
+    recognitionRef.current = rec;
+    setListening(true);
+    rec.start();
+  };
+
+  const stopListening = () => {
+    recognitionRef.current?.stop();
+    setListening(false);
+  };
+
+  const speakAnswer = (text: string) => {
+    if (!voiceEnabled || !("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text.slice(0, 600));
+    u.lang = "es-CO";
+    u.rate = 1.05;
+    u.pitch = 1.0;
+    window.speechSynthesis.speak(u);
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -120,6 +186,8 @@ export default function Asistente() {
                 meta: { mock: meta.mock, cached: meta.cached },
               };
             }
+            // TTS si está habilitado
+            if (voiceEnabled && accumulated) speakAnswer(accumulated);
             return next;
           });
         },
@@ -417,22 +485,54 @@ export default function Asistente() {
           background: "rgba(10,46,46,0.5)",
         }}
       >
-        <div className="flex gap-3 max-w-4xl mx-auto">
+        <div className="flex gap-2 max-w-4xl mx-auto items-center">
           <input
             ref={inputRef}
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKey}
-            placeholder="Escribe tu pregunta sobre bioprocesos…"
+            placeholder={listening ? "🎤 Escuchando — hablá ahora" : "Escribe tu pregunta sobre bioprocesos…"}
             disabled={loading}
             className="flex-1 rounded-xl px-4 py-3 text-sm outline-none"
             style={{
               background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(0,229,204,0.25)",
+              border: listening ? "1px solid var(--bs-alert)" : "1px solid rgba(0,229,204,0.25)",
               color: "white",
             }}
           />
+          <button
+            type="button"
+            onClick={listening ? stopListening : startListening}
+            disabled={loading}
+            title={listening ? "Parar reconocimiento" : "Hablar (ES-CO)"}
+            className="w-11 h-11 rounded-xl font-semibold transition-all hover:scale-105 flex-shrink-0 flex items-center justify-center"
+            style={{
+              background: listening ? "var(--bs-alert)" : "rgba(255,255,255,0.06)",
+              border: `1px solid ${listening ? "var(--bs-alert)" : "rgba(0,229,204,0.25)"}`,
+              color: listening ? "white" : "var(--bs-accent)",
+              animation: listening ? "pulse-dot 1.2s ease-in-out infinite" : "none",
+            }}
+          >
+            🎤
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              const next = !voiceEnabled;
+              setVoiceEnabled(next);
+              if (!next && "speechSynthesis" in window) window.speechSynthesis.cancel();
+            }}
+            title={voiceEnabled ? "TTS activado — click para desactivar" : "Leer respuestas en voz (ES-CO)"}
+            className="w-11 h-11 rounded-xl font-semibold transition-colors flex-shrink-0 flex items-center justify-center"
+            style={{
+              background: voiceEnabled ? "rgba(0, 229, 204, 0.2)" : "rgba(255,255,255,0.06)",
+              border: `1px solid ${voiceEnabled ? "var(--bs-accent)" : "rgba(0,229,204,0.25)"}`,
+              color: voiceEnabled ? "var(--bs-accent)" : "var(--bs-text-muted)",
+            }}
+          >
+            🔊
+          </button>
           <button
             onClick={() => handleSend(input)}
             disabled={loading || !input.trim()}
