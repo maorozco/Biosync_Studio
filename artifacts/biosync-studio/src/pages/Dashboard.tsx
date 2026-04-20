@@ -1,5 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import PainPointsWidget from "../components/PainPointsWidget";
+import KpiCard from "../components/KpiCard";
+import PasteCSVBanner from "../components/PasteCSVBanner";
+import { usePasteCSV } from "../hooks/usePasteCSV";
 import {
   LineChart,
   Line,
@@ -187,6 +190,86 @@ const modelDetails = [
   { label: "Fuentes", value: "Pfizer MI Edge (AWS), Algocell, bioRxiv 2024, Biotechnology & Bioengineering" },
 ];
 
+function PasteCSVResults() {
+  const { status, analysis, cached, rowsCount, reset } = usePasteCSV();
+  return (
+    <PasteCSVBanner
+      status={status}
+      analysis={analysis}
+      cached={cached}
+      rowsCount={rowsCount}
+      onReset={reset}
+    />
+  );
+}
+
+function KpiStrip() {
+  // Genera sparkline data estable (no client re-render en cada tick)
+  const spark = useMemo(() => {
+    const rand = (seed: number) => {
+      let x = Math.sin(seed) * 10000;
+      return x - Math.floor(x);
+    };
+    return {
+      ph: Array.from({ length: 30 }, (_, i) => 7.2 - 0.08 * Math.sin(i / 4) + (rand(i) - 0.5) * 0.05),
+      do: Array.from({ length: 30 }, (_, i) => 42 + 3 * Math.cos(i / 3) + (rand(i + 100) - 0.5) * 2),
+      temp: Array.from({ length: 30 }, (_, i) => 37.1 + 0.1 * Math.sin(i / 5) + (rand(i + 200) - 0.5) * 0.1),
+      yield: Array.from({ length: 30 }, (_, i) => 90 + (i / 30) * 4 + (rand(i + 300) - 0.5) * 0.8),
+    };
+  }, []);
+
+  return (
+    <div className="px-4 lg:px-8 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <KpiCard
+          label="pH actual"
+          value={7.12}
+          unit="pH"
+          decimals={2}
+          sparkline={spark.ph}
+          delta={-0.08}
+          deltaLabel="vs óptimo 7.2"
+          severity="warn"
+          updatedSecondsAgo={3}
+        />
+        <KpiCard
+          label="Oxígeno disuelto"
+          value={42.3}
+          unit="%"
+          decimals={1}
+          sparkline={spark.do}
+          delta={2.1}
+          deltaLabel="vs −1h"
+          severity="ok"
+          updatedSecondsAgo={3}
+        />
+        <KpiCard
+          label="Temperatura"
+          value={37.2}
+          unit="°C"
+          decimals={1}
+          sparkline={spark.temp}
+          delta={0.2}
+          deltaLabel="estable"
+          severity="neutral"
+          updatedSecondsAgo={3}
+        />
+        <KpiCard
+          label="Rendimiento predicho"
+          value={94.2}
+          unit="%"
+          decimals={1}
+          sparkline={spark.yield}
+          delta={3.1}
+          deltaLabel="con ajustes IA"
+          severity="ok"
+          updatedSecondsAgo={3}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const [phSP, setPhSP] = useState(7.2);
   const [tempSP, setTempSP] = useState(37);
@@ -210,40 +293,30 @@ export default function Dashboard() {
   return (
     <div className="page-enter min-h-screen" style={{ background: "#06191A" }}>
       {/* Header */}
-      <div className="px-4 lg:px-8 pt-6 pb-4">
-        <h1 className="text-xl font-bold text-white mb-1">📊 Monitor de Biorreactor en Tiempo Real</h1>
-        <p className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
-          Datos simulados de un cultivo de E. coli para producción de Vitamina B12
-        </p>
+      <div className="px-4 lg:px-8 pt-6 pb-4 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold bs-h-tight" style={{ color: "var(--bs-text-primary)" }}>
+            📊 Monitor de Biorreactor en Tiempo Real
+          </h1>
+          <p className="text-sm mt-1" style={{ color: "var(--bs-text-muted)" }}>
+            Datos simulados de un cultivo de E. coli para producción de Vitamina B12 ·{" "}
+            <span className="bs-mono text-xs" style={{ color: "var(--bs-accent)" }}>
+              pega un CSV (⌘V) para analizar el tuyo
+            </span>
+          </p>
+        </div>
       </div>
+
+      {/* PASTE CSV BANNER (magic moment #1) */}
+      <PasteCSVResults />
 
       {/* PAIN POINTS WIDGET — data del API (mock si VITE_API_URL vacío) */}
       <div className="px-4 lg:px-8">
         <PainPointsWidget />
       </div>
 
-      {/* TOP METRICS */}
-      <div className="px-4 lg:px-8 mb-6">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[
-            { label: "pH actual", value: "7.12", delta: "-0.08 vs óptimo (7.2)", bad: true },
-            { label: "Oxígeno disuelto", value: "42.3%", delta: "+2.1% vs última hora", bad: false },
-            { label: "Temperatura", value: "37.2°C", delta: "+0.2°C", neutral: true },
-            { label: "Rendimiento predicho", value: "94.2%", delta: "+3.1% con ajustes", bad: false },
-          ].map((m) => (
-            <div key={m.label} className="metric-card p-4">
-              <p className="text-xs text-white/50 mb-1">{m.label}</p>
-              <p className="text-2xl font-bold text-white">{m.value}</p>
-              <p
-                className="text-xs mt-1 font-medium"
-                style={{ color: m.neutral ? "#9CA3AF" : m.bad ? "#EF4444" : "#10B981" }}
-              >
-                {m.bad ? "▼" : m.neutral ? "●" : "▲"} {m.delta}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* TOP METRICS — premium KPI cards con animated ticker + sparkline + pulse */}
+      <KpiStrip />
 
       {/* MAIN CONTENT */}
       <div className="px-4 lg:px-8 pb-8">
