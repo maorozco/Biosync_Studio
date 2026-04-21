@@ -1,0 +1,29 @@
+# Drop-in deploy config for BioSync api-server (Express 5, autoscale).
+# Activate: cp .replit.deploy-api .replit
+# Then click Deploy → Autoscale in Replit UI.
+# Default mock mode works with zero secrets. Healthcheck: GET /api/healthz
+
+modules = ["nodejs-20", "nix"]
+run = "pnpm --filter @workspace/api-server dev"
+hidden = [".config", "node_modules", "dist", ".cache", ".local", "test-results", "playwright-report"]
+
+[nix]
+channel = "stable-24_05"
+
+[env]
+PORT = "4320"
+HOST = "0.0.0.0"
+NODE_ENV = "production"
+
+[agent]
+stack = "PNPM_WORKSPACE"
+expertMode = true
+
+[deployment]
+deploymentTarget = "autoscale"
+build = ["sh", "-c", "corepack enable && corepack prepare pnpm@9 --activate && pnpm install --frozen-lockfile && pnpm --filter @workspace/api-server build"]
+run = ["sh", "-c", "pnpm --filter @workspace/api-server start"]
+
+[[ports]]
+localPort = 4320
+externalPort = 80
