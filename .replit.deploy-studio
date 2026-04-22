@@ -3,7 +3,9 @@
 # Then click Deploy → Static in Replit UI.
 
 modules = ["nodejs-20", "nix"]
-run = "PORT=4310 BASE_PATH=/ pnpm --filter @workspace/biosync-studio dev"
+# `pnpm install` prepended so a fresh Repl import (or branch pull) can resolve
+# workspace deps like driver.js before Vite dev does import-analysis.
+run = "pnpm install --frozen-lockfile && PORT=4310 BASE_PATH=/ pnpm --filter @workspace/biosync-studio dev"
 hidden = [".config", "node_modules", "dist", ".cache", ".local", "test-results", "playwright-report"]
 
 [nix]
@@ -17,6 +19,11 @@ BASE_PATH = "/"
 [agent]
 stack = "PNPM_WORKSPACE"
 expertMode = true
+
+# Keeps node_modules fresh after every `git pull` (belt-and-suspenders for run).
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 120000
 
 [deployment]
 deploymentTarget = "static"
