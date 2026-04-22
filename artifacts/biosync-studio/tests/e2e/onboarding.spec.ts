@@ -10,7 +10,7 @@ test.describe("Onboarding — welcome + checklist + help", () => {
 
   test("welcome modal aparece en primera visita", async ({ page }) => {
     await page.reload();
-    await expect(page.getByRole("heading", { name: /Hola — soy Manuela/i })).toBeVisible({
+    await expect(page.getByRole("heading", { name: /Hola — soy Bioma/i })).toBeVisible({
       timeout: 8_000,
     });
     // Slide 1 con CTA visible
@@ -43,11 +43,11 @@ test.describe("Onboarding — welcome + checklist + help", () => {
     await page.reload();
     await page.getByRole("button", { name: /Ya conozco — saltar/i }).click();
     // Welcome modal ya no está visible
-    await expect(page.getByRole("heading", { name: /Hola — soy Manuela/i })).not.toBeVisible();
+    await expect(page.getByRole("heading", { name: /Hola — soy Bioma/i })).not.toBeVisible();
 
     // Reload → welcome NO vuelve (porque dismissedAt se guardó)
     await page.reload();
-    await expect(page.getByRole("heading", { name: /Hola — soy Manuela/i })).not.toBeVisible({
+    await expect(page.getByRole("heading", { name: /Hola — soy Bioma/i })).not.toBeVisible({
       timeout: 3_000,
     });
   });
@@ -74,7 +74,7 @@ test.describe("Onboarding — welcome + checklist + help", () => {
     await page.getByTestId("help-button").click();
     await page.getByTestId("help-restart-tour").click();
     // Welcome modal reabre
-    await expect(page.getByRole("heading", { name: /Hola — soy Manuela/i })).toBeVisible({
+    await expect(page.getByRole("heading", { name: /Hola — soy Bioma/i })).toBeVisible({
       timeout: 5_000,
     });
   });

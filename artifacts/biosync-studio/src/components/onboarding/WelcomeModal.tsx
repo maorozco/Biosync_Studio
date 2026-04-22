@@ -102,13 +102,13 @@ export default function WelcomeModal({ open, onSelectPersona, onSkip }: Props) {
                       className="text-3xl font-bold bs-h-tight mb-3"
                       style={{ color: "var(--bs-text-primary)" }}
                     >
-                      Hola — soy Manuela.
+                      Hola — soy Bioma.
                     </h1>
                     <p
                       className="text-base leading-relaxed mb-2"
                       style={{ color: "var(--bs-text-secondary)" }}
                     >
-                      Construí BioSync Studio para que los biólogos dejen de perder lotes por muestrear una vez al día.
+                      Estoy acá para darte un recorrido por el ecosistema. BioSync Studio fue diseñado para apoyar a los profesionales de los bioprocesos, evitando la pérdida de lotes al muestrear una vez al día y optimizando recursos.
                     </p>
                     <p
                       className="text-base leading-relaxed mb-8"

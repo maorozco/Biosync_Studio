@@ -4,7 +4,9 @@
 # Default mock mode works with zero secrets. Healthcheck: GET /api/healthz
 
 modules = ["nodejs-20", "nix"]
-run = "pnpm --filter @workspace/api-server dev"
+# `pnpm install` prepended so a fresh Repl import (or branch pull) has all
+# workspace deps resolved before api-server starts.
+run = "pnpm install --frozen-lockfile && pnpm --filter @workspace/api-server dev"
 hidden = [".config", "node_modules", "dist", ".cache", ".local", "test-results", "playwright-report"]
 
 [nix]
@@ -18,6 +20,11 @@ NODE_ENV = "production"
 [agent]
 stack = "PNPM_WORKSPACE"
 expertMode = true
+
+# Keeps node_modules fresh after every `git pull` (belt-and-suspenders for run).
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 120000
 
 [deployment]
 deploymentTarget = "autoscale"
