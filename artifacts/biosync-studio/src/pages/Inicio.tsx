@@ -1,12 +1,36 @@
 import { Link } from "wouter";
 
 const products = [
-  { icon: "💊", name: "Vitaminas y nutrientes", desc: "B12, B2 (riboflavina), ácido fólico, vitamina C. Producción microbiana escalable y accesible." },
-  { icon: "🧬", name: "Proteínas recombinantes", desc: "Insulina, factores de crecimiento, colágeno. El futuro de la biomedicina." },
-  { icon: "🎨", name: "Pigmentos naturales", desc: "Colorantes alimentarios sin químicos. Mercado global en expansión." },
-  { icon: "🧪", name: "Enzimas industriales", desc: "Para detergentes, textil, alimentos. Mercado de $7B en crecimiento." },
-  { icon: "🌿", name: "Bioplásticos", desc: "PHA, PLA producidos por fermentación. Reemplazan petroquímicos contaminantes." },
-  { icon: "🍺", name: "Aromas y fragancias", desc: "Biosintéticos por fermentación de precisión. Mercado de $5B para 2028." },
+  {
+    icon: "💊",
+    name: "Vitaminas y nutrientes",
+    desc: "B12 para el sistema nervioso. B2 (riboflavina) para que el cuerpo produzca energía. Ácido fólico para el desarrollo infantil. Vitamina C para las defensas. Producibles localmente con microbios, sin depender de importaciones.",
+  },
+  {
+    icon: "🧬",
+    name: "Proteínas recombinantes",
+    desc: "Insulina para diabetes. Factores de crecimiento que ayudan a recuperar tejido en casos de desnutrición severa. Colágeno para piel y huesos. Medicinas hechas con bacterias en vez de extraerse de animales.",
+  },
+  {
+    icon: "🎨",
+    name: "Pigmentos naturales",
+    desc: "Colorantes de alimentos hechos por microbios, sin químicos sintéticos. Algunos aportan nutrición real — el betacaroteno, por ejemplo, el cuerpo lo convierte en vitamina A.",
+  },
+  {
+    icon: "🧪",
+    name: "Enzimas industriales",
+    desc: "Proteínas que hacen un trabajo específico — como la lactasa, que ayuda a digerir la leche sin malestar. También se usan en detergentes y en procesos alimentarios.",
+  },
+  {
+    icon: "🌿",
+    name: "Bioplásticos",
+    desc: "Envases que los microbios descomponen naturalmente — alternativa al plástico del petróleo que contamina suelos y agua donde crecen los alimentos.",
+  },
+  {
+    icon: "🍺",
+    name: "Aromas y fragancias",
+    desc: "Sabores y olores naturales producidos por fermentación en vez de síntesis química. Ayudan a que alimentos fortificados sean más agradables de consumir, sobre todo para niños.",
+  },
 ];
 
 const metrics = [
@@ -19,18 +43,18 @@ const metrics = [
 const steps = [
   {
     icon: "📡",
-    title: "Conecta",
-    desc: "Conecta los sensores de tu biorreactor (pH, DO, temperatura, glucosa). Compatible con sensores estándar (Hamilton, Mettler Toledo).",
+    title: "Conectás",
+    desc: "Enchufás los sensores de tu biorreactor —pH, oxígeno, temperatura, glucosa— con los modelos estándar de la industria (Hamilton, Mettler Toledo). Si ya tenés un Excel con datos pasados, también sirve: lo pegás y listo.",
   },
   {
     icon: "🧠",
-    title: "Aprende",
-    desc: "Nuestra IA (Gradient Boosting + PINN) analiza tus datos históricos, detecta patrones, y predice el rendimiento óptimo.",
+    title: "La IA aprende",
+    desc: "Nuestra IA mira tus datos pasados, detecta qué condiciones dieron los mejores resultados y cuáles fallaron. Todo sin que tengas que saber programar ni estadística.",
   },
   {
     icon: "🚀",
-    title: "Optimiza",
-    desc: "Recibe recomendaciones de setpoints, alertas predictivas, y protocolos optimizados de la red global.",
+    title: "Te guía",
+    desc: "Te dice qué valores ajustar para rendir mejor, te avisa antes de que algo falle y te muestra protocolos validados por otros laboratorios de la red.",
   },
 ];
 
@@ -140,7 +164,7 @@ export default function Inicio() {
             ¿Qué puedes producir con BioSync Studio?
           </h2>
           <p className="text-center text-white/50 text-sm mb-10">
-            Optimiza la producción de cualquier molécula de alto valor
+            Desde vitaminas que combaten la desnutrición hasta medicinas esenciales — producibles con microbios, localmente, a una fracción del costo.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {products.map((p) => (

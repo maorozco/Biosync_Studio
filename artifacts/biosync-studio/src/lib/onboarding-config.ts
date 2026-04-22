@@ -23,8 +23,8 @@ export const TASKS: Record<OnboardingTaskId, OnboardingTask> = {
   "paste-csv": {
     id: "paste-csv",
     icon: "📊",
-    label: "Pegá tu primer CSV",
-    hint: "⌘V sobre el Dashboard o usá el dataset demo · el más wow de los 4",
+    label: "Pegá tus datos",
+    hint: "Pegá un Excel o CSV sobre el Dashboard (⌘V) o probá con el dataset demo — vas a ver los gráficos al instante.",
     ctaLabel: "Ir al Dashboard",
     ctaHref: "/dashboard",
     aha: 5,
@@ -32,8 +32,8 @@ export const TASKS: Record<OnboardingTaskId, OnboardingTask> = {
   "ask-assistant": {
     id: "ask-assistant",
     icon: "💬",
-    label: "Preguntale al Asistente",
-    hint: "Streaming + citas verificables + chips de setpoints",
+    label: "Hacele una pregunta a la IA",
+    hint: "Preguntale lo que quieras sobre tu proceso. Te responde al instante citando papers científicos reales.",
     ctaLabel: "Abrir Asistente",
     ctaHref: "/asistente",
     aha: 4,
@@ -41,8 +41,8 @@ export const TASKS: Record<OnboardingTaskId, OnboardingTask> = {
   "run-simulation": {
     id: "run-simulation",
     icon: "🧪",
-    label: "Simulá un batch",
-    hint: "Gemelo digital PINN con banda 90% CI",
+    label: "Simulá un lote",
+    hint: "Simulamos tu próxima corrida antes de gastar reactivos reales — con margen de error del 10 %.",
     ctaLabel: "Ir al Simulador",
     ctaHref: "/simulador",
     aha: 3,
@@ -50,8 +50,8 @@ export const TASKS: Record<OnboardingTaskId, OnboardingTask> = {
   "export-model-card": {
     id: "export-model-card",
     icon: "❄️",
-    label: "Exportá la Model Card",
-    hint: "Annex 22-ready PDF con hash SHA-256",
+    label: "Exportá el informe certificable",
+    hint: "PDF con el registro completo del modelo de IA — listo para cumplir con las normas sanitarias 2026.",
     ctaLabel: "Ver Frozen Badge",
     ctaHref: "/dashboard",
     aha: 2,
@@ -74,18 +74,18 @@ export function orderedTasks(persona: Persona): OnboardingTask[] {
 export const PERSONA_LABELS: Record<Persona, { title: string; hint: string; emoji: string }> = {
   "pd-scientist": {
     emoji: "🔬",
-    title: "PD Scientist / Fermentation Engineer",
-    hint: "Corrés biorreactores · te interesan yields + troubleshooting + scale-up",
+    title: "Trabajo en un laboratorio",
+    hint: "Hago experimentos con biorreactores. Me interesa producir más, fallar menos y pasar del laboratorio a la planta.",
   },
   founder: {
     emoji: "🚀",
-    title: "Founder / PI / CTO",
-    hint: "Decidís la inversión · te interesa compliance, moat técnico y ROI",
+    title: "Dirijo una empresa o proyecto",
+    hint: "Decido dónde se invierte. Me importa que cumpla con normas, que sea difícil de copiar y que dé resultados.",
   },
   other: {
     emoji: "🧭",
-    title: "Explorador",
-    hint: "Curioseando BioSync · vas a ver un tour breve del producto",
+    title: "Estoy explorando",
+    hint: "Todavía no conozco BioSync. Quiero un recorrido rápido para entender qué es.",
   },
 };
 
