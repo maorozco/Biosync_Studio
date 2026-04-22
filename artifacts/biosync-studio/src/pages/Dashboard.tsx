@@ -1,4 +1,12 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
+import PainPointsWidget from "../components/PainPointsWidget";
+import KpiCard from "../components/KpiCard";
+import PasteCSVBanner from "../components/PasteCSVBanner";
+import CycleReplay from "../components/CycleReplay";
+import FrozenModeBadge from "../components/FrozenModeBadge";
+import { usePasteCSV } from "../hooks/usePasteCSV";
+import { motion, AnimatePresence } from "framer-motion";
+import { emitTaskComplete } from "../components/onboarding/OnboardingProvider";
 import {
   LineChart,
   Line,
@@ -186,6 +194,208 @@ const modelDetails = [
   { label: "Fuentes", value: "Pfizer MI Edge (AWS), Algocell, bioRxiv 2024, Biotechnology & Bioengineering" },
 ];
 
+function ReplayButton() {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:scale-105 flex-shrink-0"
+        style={{
+          background: "rgba(0, 229, 204, 0.1)",
+          color: "var(--bs-accent)",
+          border: "1px solid var(--bs-border-default)",
+        }}
+      >
+        🎬 Replay última corrida
+      </button>
+      <CycleReplay open={open} onClose={() => setOpen(false)} />
+    </>
+  );
+}
+
+interface AppliedPreset {
+  preset?: string;
+  ph?: number;
+  temp?: number;
+  do?: number;
+  rpm?: number;
+}
+
+function PresetAppliedBanner() {
+  const [preset, setPreset] = useState<AppliedPreset | null>(null);
+
+  useEffect(() => {
+    const qs = new URLSearchParams(window.location.search);
+    const raw: AppliedPreset = {
+      preset: qs.get("preset") ?? undefined,
+      ph: qs.has("ph") ? Number(qs.get("ph")) : undefined,
+      temp: qs.has("temp") ? Number(qs.get("temp")) : undefined,
+      do: qs.has("do") ? Number(qs.get("do")) : undefined,
+      rpm: qs.has("rpm") ? Number(qs.get("rpm")) : undefined,
+    };
+    const hasAny =
+      raw.preset || raw.ph !== undefined || raw.temp !== undefined || raw.do !== undefined || raw.rpm !== undefined;
+    if (!hasAny) return;
+    setPreset(raw);
+    window.history.replaceState({}, "", window.location.pathname);
+    const timer = setTimeout(() => setPreset(null), 12_000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <AnimatePresence>
+      {preset && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.32 }}
+          className="px-4 lg:px-8 mb-4"
+        >
+          <div
+            className="rounded-xl px-4 py-3 flex items-center gap-3"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(167, 139, 250, 0.12), rgba(0, 229, 204, 0.08))",
+              border: "1px solid rgba(167, 139, 250, 0.4)",
+              boxShadow: "0 0 24px rgba(167, 139, 250, 0.2)",
+            }}
+          >
+            <span style={{ fontSize: 18 }}>⚡</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold" style={{ color: "var(--bs-ml)" }}>
+                Preset del Asistente aplicado
+                {preset.preset && (
+                  <span className="ml-2 bs-mono text-[11px]" style={{ color: "var(--bs-text-muted)" }}>
+                    · {preset.preset}
+                  </span>
+                )}
+              </p>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {preset.ph !== undefined && (
+                  <span className="bs-mono text-[11px]" style={{ color: "var(--bs-text-secondary)" }}>
+                    pH <strong style={{ color: "var(--bs-accent)" }}>{preset.ph}</strong>
+                  </span>
+                )}
+                {preset.temp !== undefined && (
+                  <span className="bs-mono text-[11px]" style={{ color: "var(--bs-text-secondary)" }}>
+                    · Temp <strong style={{ color: "var(--bs-accent)" }}>{preset.temp}°C</strong>
+                  </span>
+                )}
+                {preset.do !== undefined && (
+                  <span className="bs-mono text-[11px]" style={{ color: "var(--bs-text-secondary)" }}>
+                    · DO <strong style={{ color: "var(--bs-accent)" }}>{preset.do}%</strong>
+                  </span>
+                )}
+                {preset.rpm !== undefined && (
+                  <span className="bs-mono text-[11px]" style={{ color: "var(--bs-text-secondary)" }}>
+                    · RPM <strong style={{ color: "var(--bs-accent)" }}>{preset.rpm}</strong>
+                  </span>
+                )}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setPreset(null)}
+              className="text-xs px-2 py-1 rounded hover:bg-white/5 transition-colors flex-shrink-0"
+              style={{ color: "var(--bs-text-muted)" }}
+            >
+              ✕
+            </button>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function PasteCSVResults() {
+  const { status, analysis, cached, rowsCount, reset } = usePasteCSV();
+  useEffect(() => {
+    if (status === "done") emitTaskComplete("paste-csv");
+  }, [status]);
+  return (
+    <div data-spotlight="paste-csv">
+      <PasteCSVBanner
+        status={status}
+        analysis={analysis}
+        cached={cached}
+        rowsCount={rowsCount}
+        onReset={reset}
+      />
+    </div>
+  );
+}
+
+function KpiStrip() {
+  // Genera sparkline data estable (no client re-render en cada tick)
+  const spark = useMemo(() => {
+    const rand = (seed: number) => {
+      let x = Math.sin(seed) * 10000;
+      return x - Math.floor(x);
+    };
+    return {
+      ph: Array.from({ length: 30 }, (_, i) => 7.2 - 0.08 * Math.sin(i / 4) + (rand(i) - 0.5) * 0.05),
+      do: Array.from({ length: 30 }, (_, i) => 42 + 3 * Math.cos(i / 3) + (rand(i + 100) - 0.5) * 2),
+      temp: Array.from({ length: 30 }, (_, i) => 37.1 + 0.1 * Math.sin(i / 5) + (rand(i + 200) - 0.5) * 0.1),
+      yield: Array.from({ length: 30 }, (_, i) => 90 + (i / 30) * 4 + (rand(i + 300) - 0.5) * 0.8),
+    };
+  }, []);
+
+  return (
+    <div className="px-4 lg:px-8 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <KpiCard
+          label="pH actual"
+          value={7.12}
+          unit="pH"
+          decimals={2}
+          sparkline={spark.ph}
+          delta={-0.08}
+          deltaLabel="vs óptimo 7.2"
+          severity="warn"
+          updatedSecondsAgo={3}
+        />
+        <KpiCard
+          label="Oxígeno disuelto"
+          value={42.3}
+          unit="%"
+          decimals={1}
+          sparkline={spark.do}
+          delta={2.1}
+          deltaLabel="vs −1h"
+          severity="ok"
+          updatedSecondsAgo={3}
+        />
+        <KpiCard
+          label="Temperatura"
+          value={37.2}
+          unit="°C"
+          decimals={1}
+          sparkline={spark.temp}
+          delta={0.2}
+          deltaLabel="estable"
+          severity="neutral"
+          updatedSecondsAgo={3}
+        />
+        <KpiCard
+          label="Rendimiento predicho"
+          value={94.2}
+          unit="%"
+          decimals={1}
+          sparkline={spark.yield}
+          delta={3.1}
+          deltaLabel="con ajustes IA"
+          severity="ok"
+          updatedSecondsAgo={3}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const [phSP, setPhSP] = useState(7.2);
   const [tempSP, setTempSP] = useState(37);
@@ -209,35 +419,39 @@ export default function Dashboard() {
   return (
     <div className="page-enter min-h-screen" style={{ background: "#06191A" }}>
       {/* Header */}
-      <div className="px-4 lg:px-8 pt-6 pb-4">
-        <h1 className="text-xl font-bold text-white mb-1">📊 Monitor de Biorreactor en Tiempo Real</h1>
-        <p className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
-          Datos simulados de un cultivo de E. coli para producción de Vitamina B12
-        </p>
+      <div className="px-4 lg:px-8 pt-6 pb-4 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold bs-h-tight" style={{ color: "var(--bs-text-primary)" }}>
+            📊 Monitor de Biorreactor en Tiempo Real
+          </h1>
+          <p className="text-sm mt-1" style={{ color: "var(--bs-text-muted)" }}>
+            Datos simulados de un cultivo de E. coli para producción de Vitamina B12 ·{" "}
+            <span className="bs-mono text-xs" style={{ color: "var(--bs-accent)" }}>
+              pega un CSV (⌘V) para analizar el tuyo
+            </span>
+          </p>
+        </div>
+        <ReplayButton />
       </div>
 
-      {/* TOP METRICS */}
-      <div className="px-4 lg:px-8 mb-6">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[
-            { label: "pH actual", value: "7.12", delta: "-0.08 vs óptimo (7.2)", bad: true },
-            { label: "Oxígeno disuelto", value: "42.3%", delta: "+2.1% vs última hora", bad: false },
-            { label: "Temperatura", value: "37.2°C", delta: "+0.2°C", neutral: true },
-            { label: "Rendimiento predicho", value: "94.2%", delta: "+3.1% con ajustes", bad: false },
-          ].map((m) => (
-            <div key={m.label} className="metric-card p-4">
-              <p className="text-xs text-white/50 mb-1">{m.label}</p>
-              <p className="text-2xl font-bold text-white">{m.value}</p>
-              <p
-                className="text-xs mt-1 font-medium"
-                style={{ color: m.neutral ? "#9CA3AF" : m.bad ? "#EF4444" : "#10B981" }}
-              >
-                {m.bad ? "▼" : m.neutral ? "●" : "▲"} {m.delta}
-              </p>
-            </div>
-          ))}
-        </div>
+      {/* FROZEN MODE BADGE (Annex 22 compliance) */}
+      <div className="px-4 lg:px-8 mb-3" data-spotlight="frozen-badge">
+        <FrozenModeBadge />
       </div>
+
+      {/* PRESET APPLIED BANNER — triggered by Asistente "Aplicar" chip */}
+      <PresetAppliedBanner />
+
+      {/* PASTE CSV BANNER (magic moment #1) */}
+      <PasteCSVResults />
+
+      {/* PAIN POINTS WIDGET — data del API (mock si VITE_API_URL vacío) */}
+      <div className="px-4 lg:px-8">
+        <PainPointsWidget />
+      </div>
+
+      {/* TOP METRICS — premium KPI cards con animated ticker + sparkline + pulse */}
+      <KpiStrip />
 
       {/* MAIN CONTENT */}
       <div className="px-4 lg:px-8 pb-8">

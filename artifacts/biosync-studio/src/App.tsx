@@ -5,6 +5,10 @@ import Dashboard from "@/pages/Dashboard";
 import RedConocimiento from "@/pages/RedConocimiento";
 import Simulador from "@/pages/Simulador";
 import Asistente from "@/pages/Asistente";
+import CommandPalette from "@/components/CommandPalette";
+import OnboardingProvider from "@/components/onboarding/OnboardingProvider";
+import SpotlightTour from "@/components/onboarding/SpotlightTour";
+import { useOnboarding } from "@/hooks/useOnboarding";
 
 const navItems = [
   { path: "/", label: "🏠 Inicio" },
@@ -92,6 +96,26 @@ function Sidebar({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => vo
   );
 }
 
+function HelpButton() {
+  const { openHelp } = useOnboarding();
+  return (
+    <button
+      type="button"
+      onClick={openHelp}
+      aria-label="Ayuda"
+      title="Ayuda — ver tour, docs, contacto (⌘?)"
+      data-testid="help-button"
+      className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold transition-colors hover:bg-white/5"
+      style={{
+        color: "var(--bs-text-muted)",
+        border: "1px solid var(--bs-border-subtle)",
+      }}
+    >
+      ?
+    </button>
+  );
+}
+
 function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
   const [location] = useLocation();
   const current = navItems.find((n) => n.path === location || (n.path !== "/" && location.startsWith(n.path)));
@@ -113,6 +137,24 @@ function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
         <span className="text-white font-medium text-sm">{current?.label || "🏠 Inicio"}</span>
       </div>
       <div className="ml-auto flex items-center gap-3">
+        <HelpButton />
+        <button
+          type="button"
+          data-spotlight="cmdk"
+          onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-white/5"
+          style={{
+            color: "rgba(255,255,255,0.5)",
+            border: "1px solid rgba(0,229,204,0.2)",
+            background: "rgba(0,229,204,0.04)",
+          }}
+          title="Abrir Command Palette"
+        >
+          <span>Buscar…</span>
+          <kbd className="bs-mono text-[10px] px-1 rounded" style={{ background: "rgba(0,229,204,0.12)", color: "#00E5CC" }}>
+            ⌘K
+          </kbd>
+        </button>
         <div
           className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
           style={{ background: "rgba(0,229,204,0.15)", color: "#00E5CC", border: "1px solid rgba(0,229,204,0.3)" }}
@@ -157,11 +199,16 @@ function Router() {
 }
 
 function App() {
+  const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
   return (
-    <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-      <Layout>
-        <Router />
-      </Layout>
+    <WouterRouter base={basePath}>
+      <OnboardingProvider>
+        <Layout>
+          <Router />
+        </Layout>
+        <CommandPalette basePath={basePath} />
+        <SpotlightTour />
+      </OnboardingProvider>
     </WouterRouter>
   );
 }

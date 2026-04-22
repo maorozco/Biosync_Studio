@@ -1,0 +1,31 @@
+# Drop-in deploy config for BioSync Landing (static).
+# Activate: cp .replit.deploy-landing .replit
+# Then click Deploy → Static in Replit UI.
+
+modules = ["nodejs-20", "nix"]
+run = "pnpm --filter @workspace/landing dev"
+hidden = [".config", "node_modules", "dist", ".cache", ".local", "test-results", "playwright-report"]
+
+[nix]
+channel = "stable-24_05"
+
+[env]
+PORT = "4300"
+HOST = "0.0.0.0"
+
+[agent]
+stack = "PNPM_WORKSPACE"
+expertMode = true
+
+[deployment]
+deploymentTarget = "static"
+build = ["sh", "-c", "corepack enable && corepack prepare pnpm@9 --activate && pnpm install --frozen-lockfile && pnpm --filter @workspace/landing build"]
+publicDir = "artifacts/landing/dist"
+
+[[deployment.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[[ports]]
+localPort = 4300
+externalPort = 80

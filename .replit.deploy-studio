@@ -1,0 +1,32 @@
+# Drop-in deploy config for BioSync Studio (React 19 SPA, static).
+# Activate: cp .replit.deploy-studio .replit
+# Then click Deploy → Static in Replit UI.
+
+modules = ["nodejs-20", "nix"]
+run = "PORT=4310 BASE_PATH=/ pnpm --filter @workspace/biosync-studio dev"
+hidden = [".config", "node_modules", "dist", ".cache", ".local", "test-results", "playwright-report"]
+
+[nix]
+channel = "stable-24_05"
+
+[env]
+PORT = "4310"
+HOST = "0.0.0.0"
+BASE_PATH = "/"
+
+[agent]
+stack = "PNPM_WORKSPACE"
+expertMode = true
+
+[deployment]
+deploymentTarget = "static"
+build = ["sh", "-c", "corepack enable && corepack prepare pnpm@9 --activate && pnpm install --frozen-lockfile && BASE_PATH=/ pnpm --filter @workspace/biosync-studio build"]
+publicDir = "artifacts/biosync-studio/dist/public"
+
+[[deployment.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[[ports]]
+localPort = 4310
+externalPort = 80

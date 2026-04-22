@@ -1,0 +1,17 @@
+run = "pnpm --filter @workspace/landing dev"
+modules = ["nodejs-20", "nix"]
+
+[nix]
+channel = "stable-24_05"
+
+[deployment]
+run = ["sh", "-c", "pnpm --filter @workspace/landing preview"]
+build = ["sh", "-c", "pnpm install && pnpm --filter @workspace/landing build"]
+
+[env]
+PORT = "4300"
+HOST = "0.0.0.0"
+
+[[ports]]
+localPort = 4300
+externalPort = 80

@@ -1,0 +1,224 @@
+[
+  {
+    "id": "q-ph-drift-3am",
+    "type": "answer",
+    "text": "Si el pH bajó de 0.15 unidades en 40 min, lo más probable es acumulación de ácido orgánico (acetato, lactato, formiato) por glucosa excedente. Acciones: (1) medir glucosa residual — si >8 g/L, el feed está sobre-inyectando. (2) bajar feed rate 30% o pausar 20 min. (3) verificar DO — si está >60% puede ser overflow metabolism de Crabtree. (4) si el pH sigue bajando a pesar del feed-stop, contaminación por bacterias lácticas es probable — tomar muestra para microscopía inmediata.",
+    "tags": ["ph", "drift", "contamination", "feed", "acetato"],
+    "source_url": "https://www.bioprocessonline.com/doc/troubleshooting-bacterial-contamination-in-bioreactors-0001",
+    "source_name": "James Blackwell · BioProcessOnline",
+    "audience": "biomfg",
+    "recommendations": {
+      "title": "Ajustes recomendados para recuperar pH",
+      "confidence": 0.82,
+      "setpoints": { "ph": 7.0, "temp": 37.0, "do": 45, "rpm": 500 },
+      "actions": [
+        "Bajar feed rate 30% por 45 min",
+        "Verificar glucosa residual <5 g/L",
+        "Muestra microscopía si pH <6.8"
+      ],
+      "preset_id": "ph-recovery-ecoli"
+    }
+  },
+  {
+    "id": "q-do-crash",
+    "type": "answer",
+    "text": "DO crash en fed-batch = oxígeno insuficiente para la demanda actual. Causas en orden de frecuencia: (1) overfeeding — reducir feed rate 20-30%. (2) formación de espuma que bloquea transferencia — verificar antifoam, agregar si necesario. (3) rpm insuficiente — subir 10-20% si DO aún baja. (4) contaminación genera demanda de O2 extra — si DO crash es precedido por aumento inexplicado de base/ácido, sospechar. Regla: cambiar UNA variable por vez durante 15 min antes de la siguiente.",
+    "tags": ["do", "dissolved-oxygen", "crash", "feed", "rpm", "antifoam"],
+    "source_url": "https://www.bioprocessintl.com/process-development/doe-helps-optimize-a-cell-culture-bioproduction-system",
+    "source_name": "Steve Peppers · BioProcess International",
+    "audience": "biomfg",
+    "recommendations": {
+      "title": "Ajustes para recuperar DO",
+      "confidence": 0.79,
+      "setpoints": { "ph": 7.2, "temp": 37.0, "do": 40, "rpm": 600 },
+      "actions": [
+        "Subir RPM 15% antes de tocar feed",
+        "Verificar espuma — dosis antifoam 0.5 mL/L si hay",
+        "Reducir feed 25% si DO sigue <20% después de 15 min"
+      ],
+      "preset_id": "do-recovery"
+    }
+  },
+  {
+    "id": "q-scale-up-5l-50l",
+    "type": "answer",
+    "text": "Scale-up de 5L a 50L: mantené kLa constante (no rpm constante — la física cambia). P/V (potencia por volumen) es proxy razonable. Verificá: (1) tiempo de mezcla — en 50L puede duplicarse, usar tracer dye test. (2) gradientes locales — DO y pH pueden diferir 10-15% entre top y bottom. (3) shear stress — si bajaste rpm para mantener P/V, kLa puede caer 30%. Publicación ancla: Junker Beth (Merck) en BioProcess Intl confirma kLa como criterio primario para aerobic cultures.",
+    "tags": ["scale-up", "kla", "p/v", "gradients", "mixing-time"],
+    "source_url": "https://www.bioprocessintl.com/bioanalytical-methods/biotech-facilities-average-a-batch-failure-every-40-6-weeks",
+    "source_name": "Beth Junker · Merck R&D",
+    "audience": "biomfg",
+    "recommendations": {
+      "title": "Setpoints sugeridos para scale-up 5L → 50L",
+      "confidence": 0.76,
+      "setpoints": { "ph": 7.2, "temp": 37.0, "do": 40, "rpm": 450 },
+      "actions": [
+        "Mantené kLa constante (calculá con ungassed holdup test)",
+        "Tracer dye test — tiempo mezcla <30s",
+        "Verificá gradientes DO/pH antes de scale"
+      ],
+      "preset_id": "scale-up-5l-50l"
+    }
+  },
+  {
+    "id": "q-contamination-cost",
+    "type": "answer",
+    "text": "Contaminación en biorreactor industrial: costo directo $1-2M por batch según Beth Junker (Merck). En labs pequeños <20L: reactivos $500-5000 + pérdida de tiempo 3-14 días + cost-of-investigation. Detección temprana: (1) microscopía 2x/día. (2) turbidimetria OD con delta vs baseline — si OD salta >1.0 sin que hayas feedeado, sospechar. (3) glucose consumption rate inexplicada. Sanofi Framingham reportó 20% de batches rechazados (2022-2024) — dato público FDA warning letter ene 2025.",
+    "tags": ["contamination", "cost", "detection", "sanofi"],
+    "source_url": "https://www.statnews.com/pharmalot/2025/01/21/sanofi-fda-contamination-manufacturing-pharmaceuticals-biotech-medicines/",
+    "source_name": "STAT News · Sanofi FDA warning",
+    "audience": "biomfg"
+  },
+  {
+    "id": "q-benchling-cost",
+    "type": "answer",
+    "text": "Benchling cuesta aproximadamente $246K por 24 meses para biotechs pequeñas (cifra pública 2023 vía Brendan Studebaker 'The ELN Guy' en LinkedIn). Tier enterprise escala a $1M+. Para labs <15 FTE, esto quema el 60% del runway de Serie A en 4 meses. BioSync Studio es $99/mes por reactor — unos $1,200/año — aproximadamente 20-40× más barato, con pricing público (sin 'contact sales'). Alternativas intermedias: ELN propio en Notion + Python scripts, o Sapio Sciences.",
+    "tags": ["benchling", "pricing", "eln", "cost-comparison"],
+    "source_url": "https://www.linkedin.com/posts/brendan-studebaker-3671b911b_benchling-will-cost-your-startup-246000-activity-7074122045839605760-KR1S",
+    "source_name": "Brendan Studebaker · LinkedIn",
+    "audience": "biomfg"
+  },
+  {
+    "id": "q-ofat-alternatives",
+    "type": "answer",
+    "text": "OFAT (One Factor At A Time) en fermentación tarda 6-18 meses por cepa y no captura interacciones entre variables. Alternativas viables: (1) DoE clásico (Plackett-Burman screening → central composite design) — 2-4 semanas vs 6 meses. (2) Bayesian optimization — paper bioRxiv 2024 muestra 3-30x menos experimentos para llegar al óptimo, especialmente útil <20 batches donde Gradient Boosting no aguanta. (3) Active learning con transfer learning si tenés datos de una cepa similar. BioSync templates parten de (2) + (3) con base por organismo — el GBDT se activa cuando acumulás ≥20 corridas etiquetadas.",
+    "tags": ["ofat", "doe", "bayesian", "active-learning", "transfer-learning"],
+    "source_url": "https://arxiv.org/html/2506.12322v1",
+    "source_name": "Bayesian active learning review bioRxiv 2024",
+    "audience": "biomfg"
+  },
+  {
+    "id": "q-annex-22-status",
+    "type": "answer",
+    "text": "EMA Annex 22 está en fase draft (publicado 7 julio 2025, consulta cerrada 7 octubre 2025). Regla final esperada Q2 2026, enforcement estimado 2027-2028 tras grace period de 6-12 meses. Lo que el draft ya dice claro: 'adaptive and generative models are explicitly prohibited in GMP-critical decisions' — cita literal. Implicación práctica: si tu vendor promete 'IA que aprende en producción', no pasa inspección post-enforcement. BioSync diseñamos desde día uno con weights fijos + audit trail ALCOA+ — cuando la regla final salga, ya estamos listos. NO prometemos GMP-certified hoy; prometemos arquitectura compatible.",
+    "tags": ["annex-22", "gmp", "regulation", "ema", "compliance"],
+    "source_url": "https://www.gmp-compliance.org/files/guidemgr/mp_vol4_chap4_annex22_consultation_guideline_en.pdf",
+    "source_name": "EMA Annex 22 draft PDF",
+    "audience": "biomfg"
+  },
+  {
+    "id": "q-fast-petase",
+    "type": "answer",
+    "text": "FAST-PETase (UT Austin, Nature 2022) es una enzima diseñada vía machine learning que degrada PET post-consumo a <50°C en 1 semana. Los plásmidos están en Addgene (#185041) — cualquier lab puede replicarlo. Limitación: funciona en condiciones de biorreactor (agitación, temperatura controlada, PET triturado). No degrada PE, PP, PVC eficientemente (<30% en 2 años). El claim 'plástico en playas' era optimista; el escenario viable hoy es biorreactor distribuido que convierte PET en TPA ($680-850/ton) + etilenglicol ($500-650/ton) como materia prima vendible.",
+    "tags": ["fast-petase", "pet", "plastic", "enzyme", "biocycle"],
+    "source_url": "https://www.nature.com/articles/s41586-022-04599-z",
+    "source_name": "Lu et al. · Nature 604:662-667 (2022)",
+    "audience": "waste-general"
+  },
+  {
+    "id": "q-hydrocarbons-insitu",
+    "type": "answer",
+    "text": "Biorremediación in-situ de hidrocarburos tiene 30+ años de precedente: Exxon Valdez (1989), Deepwater Horizon (2010, bacterias Alcanivorax degradaron >90% subsuperficial en 1 semana según DOE Lawrence Berkeley), Rio Hudson, Tianjin 2010. Consorcios Pseudomonas + Bacillus + Acinetobacter + Rhodococcus degradan 60-80% en 60-180 días dependiendo de conditions. Costo $50-310/m³ vs $800-1500/m³ excavación. Encapsulación en alginato aumenta supervivencia bacteriana 1000x (Springer 2023, TPH removal 75% en 7 días vs ~40% células libres).",
+    "tags": ["hydrocarbons", "bioremediation", "in-situ", "pseudomonas", "alginate"],
+    "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3155281/",
+    "source_name": "DOE Lawrence Berkeley · Deepwater Horizon review",
+    "audience": "waste-general"
+  },
+  {
+    "id": "q-federated-biomfg",
+    "type": "answer",
+    "text": "Federated learning para biomanufactura es whitespace confirmado. Proyectos existentes: MELLODDY (Novartis drug discovery 2021-2024 — química farmacéutica, no fermentación), Owkin (clínica federada), MIT Initiative for New Manufacturing (manufactura genérica, no FL específico). Ninguno hace federated learning entre biorreactores en plantas distintas. La razón estructural: drug discovery tiene IP química unificable (SMILES); biomanufactura tiene IP heterogénea (cada cepa, medio, reactor es único). BioSync apunta a resolver el 'schema federation problem' sobre Flower 1.29 — primer comercial en intentarlo. TRL 4-5 aplicación, TRL 7-8 infraestructura.",
+    "tags": ["federated-learning", "flower", "whitespace", "moat", "biomfg"],
+    "source_url": "https://flower.ai/blog/2026-04-12-announcing-flower-1.29-release",
+    "source_name": "Flower Labs · 1.29 release",
+    "audience": "biomfg"
+  },
+  {
+    "id": "q-tribal-knowledge",
+    "type": "answer",
+    "text": "Tribal knowledge en labs pequeños: cuando un PD Scientist senior se va, el lab pierde 3-6 meses de efficiency operacional (fuente: GeneMod estudio interno). Protocolos tipo 'subí a 52°C funciona mejor' viven en laptops personales, no en ELN. Soluciones: (1) versionar protocolos en git-like system con comentarios obligatorios al modificar. (2) audit trail automático de setpoints + justificación. (3) capturar decisiones de feedeo con razonamiento ('bajé feed porque pH iba a cruzar 6.5 en 40 min'). BioSync captura (1)+(2) nativo; (3) vía notas del Asistente. El knowledge sobrevive la rotación.",
+    "tags": ["tribal-knowledge", "knowledge-capture", "eln", "rotation"],
+    "source_url": "https://intuitionlabs.ai/articles/biotech-data-silos-infrastructure-solutions",
+    "source_name": "IntuitionLabs · biotech data silos",
+    "audience": "biomfg"
+  },
+  {
+    "id": "quote-valley-of-death-geertz",
+    "type": "quote",
+    "text": "This makes the iterations going from lab to pilot to full scale, very, very tough, error prone, expensive and time consuming. Usually, startups in the fermentation space fail in the first steps going from lab to pilot.",
+    "tags": ["scale-up", "pilot", "valley-of-death"],
+    "source_url": "https://agfundernews.com/21st-bio-on-strains-scale-and-the-valley-of-death-fixing-precision-fermentations-weak-links",
+    "source_name": "Henrik Geertz-Hansen · 21st.BIO (R&D Ops Chief)",
+    "audience": "biomfg"
+  },
+  {
+    "id": "quote-cassini-michroma",
+    "type": "quote",
+    "text": "Usually, startups in the fermentation space fail in the first steps going from lab to pilot scale, then pilot scale to industrial scale… because of the [lack of] robustness of the process, not only on the fermentation side, but also on the DSP.",
+    "tags": ["scale-up", "dsp", "michroma"],
+    "source_url": "https://agfundernews.com/fermentation-will-power-next-wave-of-natural-colors-says-michroma-as-it-rides-maha-wave",
+    "source_name": "Ricky Cassini · Michroma CEO (Argentina)",
+    "audience": "biomfg"
+  },
+  {
+    "id": "quote-feala-excrete",
+    "type": "quote",
+    "text": "Particularly in biology, where the instruments themselves excrete face-palm inducing data formats, it becomes convenient to co-locate analyses to wherever the raw tables live.",
+    "tags": ["data-format", "instruments", "messy-data"],
+    "source_url": "https://medium.com/@jfeala/tidy-data-for-the-biology-lab-part-1-187aa1c0a32a",
+    "source_name": "Jake Feala (ex-Genomatica) · Medium",
+    "audience": "biomfg"
+  },
+  {
+    "id": "quote-benchling-246k",
+    "type": "quote",
+    "text": "Benchling will cost your startup $246,000 over the first 2 years. I'll show you how to save $182,000 of that precious runway (easily).",
+    "tags": ["benchling", "cost", "runway"],
+    "source_url": "https://www.linkedin.com/posts/brendan-studebaker-3671b911b_benchling-will-cost-your-startup-246000-activity-7074122045839605760-KR1S",
+    "source_name": "Brendan Studebaker · LinkedIn",
+    "audience": "biomfg"
+  },
+  {
+    "id": "quote-blackwell-contamination",
+    "type": "quote",
+    "text": "I was personally involved in defending a recurring contamination investigation before FDA, where any delay in the approval of this blockbuster would have had a negative impact of tens of millions of dollars.",
+    "tags": ["contamination", "fda", "pharma"],
+    "source_url": "https://www.bioprocessonline.com/doc/troubleshooting-bacterial-contamination-in-bioreactors-0001",
+    "source_name": "James Blackwell PhD · The Windshire Group",
+    "audience": "biomfg"
+  },
+  {
+    "id": "q-scale-up-series-a",
+    "type": "answer",
+    "text": "Scale-up para Series A: los VCs en precision fermentation quieren ver titer ≥3 g/L en 50L, yield ≥0.3, productividad ≥0.5 g/L/h. Pow.bio, 21st.BIO y Michroma son anclas públicas. El mayor killer: variance — si entre runs el CV% es >25%, el VC interpreta 'proceso no reproducible'. Estrategia práctica: (1) correr 3 runs idénticas antes del due diligence. (2) documentar setpoints + actual values side-by-side. (3) tener PAT (process analytical tech) mínima — Raman OEM desde $5K es el estándar emerging. (4) backup: un caso de Believer Meats ($390M raised, cerró dic 2025) fue visto como warning VCs que ya no compran 'hype sin data'.",
+    "tags": ["scale-up", "series-a", "vc", "titer", "variance"],
+    "source_url": "https://agfundernews.com/breaking-believer-meats-ceases-operations-but-setback-does-not-mean-cultivated-meat-sector-is-doomed-insists-amps",
+    "source_name": "AgFunder · Believer Meats closure",
+    "audience": "biomfg"
+  },
+  {
+    "id": "q-pinn-hybrid",
+    "type": "answer",
+    "text": "PINN (Physics-Informed Neural Network) para bioprocesos: útil como capa de corrección sobre Monod, NO como modelo primario. Monod captura crecimiento logístico en condiciones cercanas al óptimo; falla en stiff regime (stationary phase, product inhibition, substrate exhaustion). PINN aprende el residual. Advertencia del paper 2025 'Fundamental flaws of PINNs': el loss-weighting puede enmascarar simplificaciones — si tu L_physics domina, el model se vuelve 'Monod disfrazado'. Buena práctica: entrenar PINN con L_data dominante (λ_physics ~0.1), usar Monod como regularizador. Requisito mínimo de data: 15-20 corridas bien etiquetadas por organismo.",
+    "tags": ["pinn", "monod", "hybrid-modeling", "stiff"],
+    "source_url": "https://www.sciencedirect.com/science/article/pii/S0360835225008502",
+    "source_name": "Fundamental flaws of PINNs · ScienceDirect 2025",
+    "audience": "biomfg"
+  },
+  {
+    "id": "q-biosync-vs-sartorius",
+    "type": "answer",
+    "text": "BioSync Studio vs Sartorius SIMCA/MODDE: Sartorius es oro para GMP top-20 pharma. Sus fortalezas: 20+ años de data histórica, certificación GMP validada, integración Raman/BioPAT nativa. Sus debilidades para labs SMB: (1) licencia $5-15K/seat/año + maintenance — prohibitivo para 3 FTE. (2) onboarding 6+ meses. (3) hardware-locked a Sartorius. (4) UX desktop-era. BioSync no compite con Sartorius en pharma enterprise — atacamos el 80% ignorado: startups, spin-offs universitarios, CDMOs regionales. $99/mes público, self-serve, hardware-agnostic CSV ingest. Cuando escales a GMP, Sartorius sigue siendo opción; para pre-GMP, somos 40-100x más baratos.",
+    "tags": ["sartorius", "simca", "competitor", "pricing"],
+    "source_url": "https://www.sartorius.com/en/products/process-analytical-technology/data-analytics-software/mvda-software/simca",
+    "source_name": "Sartorius SIMCA product page",
+    "audience": "biomfg"
+  },
+  {
+    "id": "q-biocycle-vs-carbios",
+    "type": "answer",
+    "text": "BioCycle vs Carbios: Carbios es industrial-scale (Longlaville, 50,000 t/año planta demostrativa, full plant 2027-2028) — enzima LCC-A2 degrada >90% PET en 3.3h a 78°C. BioCycle es plataforma de diseño de consorcios para escenarios distribuidos (mini-biorreactores, in-situ hidrocarburos, tratamiento de suelos). Complementarios, no competidores: Carbios resuelve reciclaje concentrado de PET puro; BioCycle diseña soluciones para waste mezclado + hidrocarburos + suelos + colorantes textiles donde no hay fábrica concentrada. Nuestro moat es el software de diseño + 2,000 papers destilados, no la enzima (las enzimas son open-source de UT Austin / Addgene).",
+    "tags": ["biocycle", "carbios", "competitor", "pet"],
+    "source_url": "https://www.carbios.com/",
+    "source_name": "Carbios · corporate site",
+    "audience": "waste-general"
+  },
+  {
+    "id": "q-cost-per-batch",
+    "type": "answer",
+    "text": "Costos típicos por corrida: shake flask 250mL $5-15 USD · biorreactor 1L $50-150 · 5L $200-500 · 50L $1,000-3,000 · 100-500L $3,000-8,000. Industrial (10,000+ L) $50K-500K. Un batch fallido a escala industrial = $1-2M directo (Junker Merck, BioProcess Intl). BioSync reduce pérdida esperada 30-60% en labs con >20 batches de historia (no 100% — claim honesto). Calc ROI: lab 9 FTE corriendo 4 reactores 5L con 15% failure rate = $480-2,400/mes en batches perdidos. BioSync @ $396/mes (4 reactores) paga 1 batch salvado al mes.",
+    "tags": ["cost", "roi", "batch-failure", "pricing"],
+    "source_url": "https://www.bioprocessintl.com/bioanalytical-methods/biotech-facilities-average-a-batch-failure-every-40-6-weeks",
+    "source_name": "Beth Junker · Merck · BioProcess International",
+    "audience": "biomfg"
+  }
+]
